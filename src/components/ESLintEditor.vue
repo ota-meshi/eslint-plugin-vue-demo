@@ -69,7 +69,7 @@ linter.verifyAndFix = function (
     ...args: any[]
 ) {
     /* eslint-disable no-invalid-this -- ignore */
-    verifyAndFix.call(
+    return verifyAndFix.call(
         // @ts-expect-error -- ignore
         this,
         code,
