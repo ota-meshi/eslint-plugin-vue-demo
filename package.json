@@ -15,13 +15,14 @@
         "tslib": "^2.3.0",
         "vue": "^2.6.11",
         "vue-eslint-editor": "^1.1.0",
-        "vue-eslint-parser": "^7.8.0"
+        "vue-eslint-parser": "^7.8.0",
+        "@typescript-eslint/parser": "^4.18.0"
     },
     "devDependencies": {
         "@ota-meshi/eslint-plugin": "^0.7.0",
+        "@types/eslint": "^7.28.0",
         "@types/pako": "^1.0.2",
         "@typescript-eslint/eslint-plugin": "^4.18.0",
-        "@typescript-eslint/parser": "^4.18.0",
         "@vue/cli-plugin-eslint": "^4.5.0",
         "@vue/cli-plugin-typescript": "^4.5.0",
         "@vue/cli-service": "^4.5.0",
@@ -35,6 +36,7 @@
         "eslint-plugin-prettier": "^3.3.1",
         "eslint-plugin-regexp": "^0.7.0",
         "prettier": "^2.2.1",
+        "string-replace-loader": "^3.0.3",
         "typescript": "~4.1.5",
         "vue-template-compiler": "^2.6.11"
     }
