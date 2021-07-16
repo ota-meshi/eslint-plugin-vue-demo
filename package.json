@@ -1,0 +1,41 @@
+{
+    "name": "eslint-plugin-vue-demo",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "serve": "vue-cli-service serve",
+        "build": "vue-cli-service build",
+        "lint": "eslint .",
+        "lint-fix": "eslint . --fix"
+    },
+    "dependencies": {
+        "eslint-plugin-vue": "^7.13.0",
+        "eslint4b": "^7.30.0",
+        "pako": "^2.0.3",
+        "tslib": "^2.3.0",
+        "vue": "^2.6.11",
+        "vue-eslint-editor": "^1.1.0",
+        "vue-eslint-parser": "^7.8.0"
+    },
+    "devDependencies": {
+        "@ota-meshi/eslint-plugin": "^0.7.0",
+        "@types/pako": "^1.0.2",
+        "@typescript-eslint/eslint-plugin": "^4.18.0",
+        "@typescript-eslint/parser": "^4.18.0",
+        "@vue/cli-plugin-eslint": "^4.5.0",
+        "@vue/cli-plugin-typescript": "^4.5.0",
+        "@vue/cli-service": "^4.5.0",
+        "@vue/eslint-config-prettier": "^6.0.0",
+        "@vue/eslint-config-typescript": "^7.0.0",
+        "eslint": "^7.30.0",
+        "eslint-plugin-eslint-comments": "^3.2.0",
+        "eslint-plugin-json-schema-validator": "^1.1.2",
+        "eslint-plugin-jsonc": "^1.4.0",
+        "eslint-plugin-node": "^11.1.0",
+        "eslint-plugin-prettier": "^3.3.1",
+        "eslint-plugin-regexp": "^0.7.0",
+        "prettier": "^2.2.1",
+        "typescript": "~4.1.5",
+        "vue-template-compiler": "^2.6.11"
+    }
+}

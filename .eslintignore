@@ -1,0 +1,4 @@
+/node_modules
+!/.vscode
+/typings/vue-eslint-editor
+/dist
