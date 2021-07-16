@@ -24,10 +24,12 @@ function getEnabledRules(
 export function serializeState(state: {
     code?: string
     rules?: Record<string, "error" | "off">
+    parser?: string
 }): string {
     const saveData = {
         code: state.code,
         rules: state.rules ? getEnabledRules(state.rules) : undefined,
+        parser: state.parser,
     }
     const jsonString = JSON.stringify(saveData)
     const uint8Arr = new TextEncoder().encode(jsonString)

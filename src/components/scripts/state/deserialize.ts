@@ -8,13 +8,16 @@ import pako from "pako"
 export function deserializeState(serializedString: string): {
     code?: string
     rules?: Record<string, "error" | "off">
+    parser?: string
 } {
     const state: {
         code?: string
         rules?: Record<string, "error" | "off">
+        parser?: string
     } = {
         code: undefined,
         rules: undefined,
+        parser: undefined,
     }
 
     if (serializedString === "") {
@@ -32,6 +35,9 @@ export function deserializeState(serializedString: string): {
         if (typeof json === "object" && json != null) {
             if (typeof json.code === "string") {
                 state.code = json.code
+            }
+            if (typeof json.parser === "string") {
+                state.parser = json.parser
             }
             if (typeof json.rules === "object" && json.rules != null) {
                 state.rules = {}

@@ -4,12 +4,14 @@
             <RulesSettings
                 ref="settings"
                 :rules.sync="rules"
+                :parser.sync="parser"
                 class="rules-settings"
             />
             <div class="editor-content">
                 <ESLintEditor
                     v-model="code"
                     :rules="rules"
+                    :parser="parser"
                     class="eslint-playground"
                     @update-messages="onUpdateMessages"
                 />
@@ -65,6 +67,7 @@ const msg = 'Hello World!'
 type Data = {
     code: string
     rules: Record<string, "error" | "off">
+    parser: string
     messages: any[]
 }
 type Methods = {
@@ -85,6 +88,7 @@ export default {
             code: state.code || DEFAULT_CODE,
             rules: state.rules || { ...DEFAULT_RULES_CONFIG },
             messages: [],
+            parser: state.parser || "default",
         }
     },
     computed: {
@@ -95,9 +99,14 @@ export default {
             const rules = equalsRules(defaultRules, this.rules)
                 ? undefined
                 : this.rules
+            const parser =
+                !this.parser || this.parser === "default"
+                    ? undefined
+                    : this.parser
             const serializedString = serializeState({
                 code,
                 rules,
+                parser,
             })
             return serializedString
         },

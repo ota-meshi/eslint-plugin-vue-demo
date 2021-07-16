@@ -32,7 +32,8 @@ export default Vue.extend({
                 require("eslint-plugin-vue/package.json"),
                 require("vue-eslint-parser/package.json"),
                 require("eslint4b/package.json"),
-                // require("@typescript-eslint/parser/package.json"),
+                require("@typescript-eslint/parser/package.json"),
+                require("typescript/package.json"),
             ],
         }
     },
@@ -61,6 +62,7 @@ export default Vue.extend({
     margin-left: auto;
     display: flex;
     flex-wrap: wrap;
+    font-size: 70%;
 }
 .packages-info a {
     padding: 0 8px;

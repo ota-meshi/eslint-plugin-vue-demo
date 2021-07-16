@@ -1,5 +1,16 @@
 <template>
     <div class="rules-settings">
+        <div class="parser">
+            <label>
+                Parser:
+                <select v-model="parserValue">
+                    <option value="default">default</option>
+                    <option value="@typescript-eslint/parser">
+                        @typescript-eslint/parser
+                    </option>
+                </select>
+            </label>
+        </div>
         <ul class="categories">
             <li
                 v-for="category in categories"
@@ -84,13 +95,26 @@ export default {
             type: Object,
             required: true,
         },
+        parser: {
+            type: String,
+        },
     },
     data() {
         return {
             categories,
+            parserValue: this.parser,
         }
     },
-    watch: {},
+    watch: {
+        parser() {
+            this.parserValue = this.parser
+        },
+        parserValue() {
+            if (this.parserValue !== this.parser) {
+                this.$emit("update:parser", this.parserValue)
+            }
+        },
+    },
     methods: {
         filterRules(rules: Rule[]) {
             return rules.filter((rule) => rule.ruleId !== "jsonc/auto")
@@ -121,14 +145,17 @@ export default {
     },
 } as ThisTypedComponentOptionsWithRecordProps<
     Vue,
-    { categories: Category[] },
+    { categories: Category[]; parserValue: string },
     { filterRules: (rules: Rule[]) => Rule[] },
     { serializedString: string },
-    { rules: Record<string, "error" | "off" | 2> }
+    { rules: Record<string, "error" | "off" | 2>; parser: string }
 >
 </script>
 
 <style scoped>
+.parser {
+    padding: 4px;
+}
 .categories {
     font-size: 14px;
 }

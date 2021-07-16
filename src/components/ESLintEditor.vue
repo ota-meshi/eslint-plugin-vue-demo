@@ -29,9 +29,35 @@ import { rules, processors } from "eslint-plugin-vue"
 import { ThisTypedComponentOptionsWithRecordProps } from "vue/types/options"
 
 const linter = new Linter()
-linter.defineParser("vue-eslint-parser", { parseForESLint })
+linter.defineParser("vue-eslint-parser", {
+    parseForESLint: parseForESLint as never,
+})
 for (const ruleId of Object.keys(rules)) {
     linter.defineRule(`vue/${ruleId}`, rules[ruleId])
+}
+
+const loadedParsers = new Vue({
+    data() {
+        return {
+            parsers: { "@typescript-eslint/parser": false } as Record<
+                string,
+                boolean | any
+            >,
+        }
+    },
+})
+// @ts-expect-error -- use require-parser
+window.loadedParsers = loadedParsers
+
+/**
+ * Load parser
+ */
+async function loadParser(parser: string) {
+    if (parser === "@typescript-eslint/parser") {
+        loadedParsers.parsers["@typescript-eslint/parser"] = await import(
+            "@typescript-eslint/parser"
+        )
+    }
 }
 
 const verifyAndFix = linter.verifyAndFix
@@ -42,7 +68,9 @@ linter.verifyAndFix = function (
     option: any,
     ...args: any[]
 ) {
+    /* eslint-disable no-invalid-this -- ignore */
     verifyAndFix.call(
+        // @ts-expect-error -- ignore
         this,
         code,
         config,
@@ -51,16 +79,28 @@ linter.verifyAndFix = function (
             postprocess: processors[".vue"].postprocess,
             ...option,
         },
+        // @ts-expect-error -- ignore
         ...args,
     )
-}
+    /* eslint-enable no-invalid-this -- ignore */
+} as never
 
 type Component = ThisTypedComponentOptionsWithRecordProps<
     Vue,
     {},
     {},
-    { linter: Linter; config: any; preprocess: any; postprocess: any },
-    { value: string; rules: Record<string, "error" | "off" | 2> }
+    {
+        linter: Linter
+        config: any
+        preprocess: any
+        postprocess: any
+        resolvedParser: string | undefined
+    },
+    {
+        value: string
+        rules: Record<string, "error" | "off" | 2>
+        parser: string | undefined
+    }
 >
 export default {
     components: { EslintEditor },
@@ -75,12 +115,29 @@ export default {
                 return {}
             },
         },
+        parser: {
+            type: String,
+            default: undefined,
+        },
     },
     computed: {
+        resolvedParser() {
+            return !this.parser || this.parser === "default"
+                ? undefined
+                : this.parser
+        },
         preprocess: () => processors[".vue"].preprocess,
         postprocess: () => processors[".vue"].postprocess,
         linter() {
-            return linter
+            if (!this.resolvedParser) {
+                return linter
+            }
+            if (loadedParsers.parsers[this.resolvedParser]) {
+                return linter
+            }
+            loadParser(this.resolvedParser)
+
+            return null
         },
         config() {
             return {
@@ -114,6 +171,7 @@ export default {
                 parserOptions: {
                     ecmaVersion: 2020,
                     sourceType: "module",
+                    parser: this.resolvedParser,
                 },
                 rules: this.rules,
                 env: {

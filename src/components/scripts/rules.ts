@@ -6,8 +6,8 @@ const linter = new Linter()
 
 export type Rule = {
     ruleId: string
-    rule: string
-    url: string
+    rule: any
+    url: string | undefined
     classes?: string
 }
 export type Category = {
@@ -109,28 +109,28 @@ for (const baseRuleId of Object.keys(vueRules)) {
     }
 }
 for (const [ruleId, rule] of linter.getRules()) {
-    if (rule.meta.deprecated) {
+    if (rule.meta?.deprecated) {
         continue
     }
     const data: Rule = {
         ruleId,
         rule,
-        url: rule.meta.docs.url,
+        url: rule.meta?.docs?.url,
     }
-    const category = rule.meta.docs.category
+    const category = rule.meta?.docs?.category
     categories.find((c) => c.title === category)?.rules.push(data)
 
-    if (rule.meta.docs.recommended) {
+    if (rule.meta?.docs?.recommended) {
         DEFAULT_RULES_CONFIG[ruleId] = "error"
     }
 }
 /** get url */
-export function getURL(ruleId: string | null): string | null {
+export function getURL(ruleId: string | null): string | null | undefined {
     if (!ruleId) {
         return null
     }
     if (ruleId.startsWith("vue/")) {
-        return vueRules[ruleId.slice(4)]?.meta.docs.url
+        return vueRules[ruleId.slice(4)]?.meta?.docs?.url
     }
-    return linter.getRules().get(ruleId)?.meta.docs.url
+    return linter.getRules().get(ruleId)?.meta?.docs?.url
 }
