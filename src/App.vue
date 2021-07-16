@@ -1,7 +1,7 @@
 <template>
     <div id="app">
         <header class="header-info">
-            <img alt="Vue logo" src="./assets/logo.png" style="height: 42px" />
+            <img class="logo" alt="Vue logo" src="./assets/logo.png" />
             <div class="site-name">eslint-plugin-vue Online Playground</div>
             <div class="packages-info">
                 <template v-for="pkg in packages">
@@ -70,6 +70,9 @@ export default Vue.extend({
     display: flex;
     align-items: center;
 }
+.logo {
+    height: 42px;
+}
 .site-name {
     font-size: 1.3rem;
     font-weight: 600;
@@ -90,5 +93,22 @@ export default Vue.extend({
 }
 .main {
     height: calc(100vh - 60px);
+}
+@media screen and (max-width: 700px) {
+    .logo {
+        display: none;
+    }
+    .site-name {
+        font-size: 1rem;
+    }
+}
+@media screen and (max-width: 600px) {
+    .logo {
+        height: 32px;
+        display: block;
+    }
+    .packages-info {
+        display: none;
+    }
 }
 </style>
