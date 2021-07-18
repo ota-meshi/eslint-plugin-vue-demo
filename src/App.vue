@@ -33,6 +33,9 @@
         <main class="main">
             <ESLintPlayground />
         </main>
+        <footer class="footer-info">
+            This site was build at :{{ buildAt }}
+        </footer>
     </div>
 </template>
 
@@ -47,6 +50,7 @@ export default Vue.extend({
     },
     data() {
         return {
+            buildAt: process.env.VUE_APP_BUILD_AT,
             packages: [
                 require("eslint-plugin-vue/package.json"),
                 require("vue-eslint-parser/package.json"),
@@ -92,7 +96,13 @@ export default Vue.extend({
     color: #2c3e50;
 }
 .main {
-    height: calc(100vh - 60px);
+    height: calc(100vh - 80px);
+}
+.footer-info {
+    height: 24px;
+    display: flex;
+    align-items: center;
+    font-size: 70%;
 }
 @media screen and (max-width: 700px) {
     .logo {
