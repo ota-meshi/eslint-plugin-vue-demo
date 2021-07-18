@@ -1,5 +1,7 @@
 const path = require("path")
-process.env.VUE_APP_BUILD_AT = `${new Date().toLocaleString()}`
+process.env.VUE_APP_BUILD_AT = new Date().toLocaleString(undefined, {
+    timeZoneName: "short",
+})
 module.exports = {
     publicPath: "/eslint-plugin-vue-demo/",
     configureWebpack(_config, _isServer) {
