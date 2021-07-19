@@ -74,22 +74,20 @@ function handleClick() {
   inputValue.value = ""
 }
 
-const buttonStyle = computed(() =>
-  inputValue.value ? { color: "black" } : { color: "white" },
-)
+const buttonColor = computed(() => (inputValue.value ? "black" : "white"));
 <` +
   // escape
   `/script>
 <style>
 .add-button {
-  color: v-bind("buttonStyle.color");
+  color: v-bind(buttonColor);
   pointer-events: v-bind("inputValue ? 'initial' : 'none'");
 }
 .todo-list {
   list-style: none;
 }
 .todo-item {
-  background-color: #ddd;
+  background-color: #eef;
 }
 .todo-item--done {
   background-color: #3fb983;
