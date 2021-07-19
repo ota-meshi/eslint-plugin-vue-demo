@@ -50,7 +50,7 @@ const DEFAULT_CODE =
   <button @click="handleClick" class="add-button">Add ToDo</button>
   <ul class="todo-list">
     <li
-      v-for="todo in todoItems"
+      v-for="(todo, index) in todoItems"
       :key="todo.id"
       class="todo-item"
       :class="{ 'todo-item--done': todo.done }"
@@ -74,7 +74,10 @@ function handleClick() {
   inputValue.value = ""
 }
 
-const buttonColor = computed(() => (inputValue.value ? "black" : "white"));
+const buttonColor = computed(() => (inputValue ? "black" : "white"));
+const buttonPointerEvents = computed(() =>
+  inputValue.value ? "initial" : "none"
+);
 <` +
   // escape
   `/script>
