@@ -53,6 +53,9 @@ module.exports = {
         project: "./tsconfig.json",
         extraFileExtensions: [".vue"],
       },
+      extends: [
+        "plugin:@typescript-eslint/recommended-requiring-type-checking",
+      ],
       rules: {
         "@typescript-eslint/array-type": "error",
         "@typescript-eslint/explicit-module-boundary-types": [

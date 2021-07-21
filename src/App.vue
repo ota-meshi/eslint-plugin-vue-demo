@@ -48,6 +48,7 @@ export default Vue.extend({
   },
   data() {
     return {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access -- env
       buildAt: process.env.VUE_APP_BUILD_AT,
       packages: [
         require("eslint-plugin-vue/package.json"),
