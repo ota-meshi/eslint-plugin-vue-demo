@@ -135,9 +135,9 @@ export default {
       return !this.parser || this.parser === "default" ? undefined : this.parser
     },
     // eslint-disable-next-line @typescript-eslint/unbound-method -- ignore
-    preprocess: vueProcessor.preprocess,
+    preprocess: () => vueProcessor.preprocess,
     // eslint-disable-next-line @typescript-eslint/unbound-method -- ignore
-    postprocess: vueProcessor.postprocess,
+    postprocess: () => vueProcessor.postprocess,
     linter() {
       if (!this.resolvedParser) {
         return linter
