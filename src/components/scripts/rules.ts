@@ -14,14 +14,16 @@ export type Category = {
   title: string
   rules: Rule[]
   isTarget?: (ruleCategories: string[] | void, rule: any) => boolean | void
+  classes?: string
 }
 
 export const categories: Category[] = [
   {
     title: "Base Rules",
-    rules: [],
     isTarget: (ruleCategories) =>
       ruleCategories && ruleCategories.includes("base"),
+    rules: [],
+    classes: "eslint-plugin-vue-category",
   },
   {
     title: "Priority A: Essential",
@@ -30,6 +32,7 @@ export const categories: Category[] = [
       (ruleCategories.includes("vue3-essential") ||
         ruleCategories.includes("essential")),
     rules: [],
+    classes: "eslint-plugin-vue-category",
   },
   {
     title: "Priority B: Strongly Recommended",
@@ -38,6 +41,7 @@ export const categories: Category[] = [
       (ruleCategories.includes("vue3-strongly-recommended") ||
         ruleCategories.includes("strongly-recommended")),
     rules: [],
+    classes: "eslint-plugin-vue-category",
   },
   {
     title: "Priority C: Recommended",
@@ -46,40 +50,49 @@ export const categories: Category[] = [
       (ruleCategories.includes("vue3-recommended") ||
         ruleCategories.includes("recommended")),
     rules: [],
+    classes: "eslint-plugin-vue-category",
   },
   {
     title: "Uncategorized",
     isTarget: (_ruleCategories, rule) => !rule.meta.docs.extensionRule,
     rules: [],
+    classes: "eslint-plugin-vue-category",
   },
   {
     title: "Extension Rules",
     isTarget: (_ruleCategories, rule) => rule.meta.docs.extensionRule,
     rules: [],
+    classes: "eslint-plugin-vue-category",
   },
   {
     title: "Possible Errors",
     rules: [],
+    classes: "eslint-category",
   },
   {
     title: "Best Practices",
     rules: [],
+    classes: "eslint-category",
   },
   {
     title: "Strict Mode",
     rules: [],
+    classes: "eslint-category",
   },
   {
     title: "Variables",
     rules: [],
+    classes: "eslint-category",
   },
   {
     title: "Stylistic Issues",
     rules: [],
+    classes: "eslint-category",
   },
   {
     title: "ECMAScript 6",
     rules: [],
+    classes: "eslint-category",
   },
 ]
 export const DEFAULT_RULES_CONFIG: Record<string, "error"> = {}

@@ -18,6 +18,25 @@
         class="category"
         :class="category.classes"
       >
+        <button
+          class="category-button"
+          :class="{
+            'category-button--close': categoryState[category.title].close,
+          }"
+          @click="
+            categoryState[category.title].close =
+              !categoryState[category.title].close
+          "
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="10"
+            viewBox="0 0 10 10"
+            width="10"
+          >
+            <path d="M2.5 10l5-5-5-5v10z" fill="#ddd" />
+          </svg>
+        </button>
         <div class="category-title-wrapper">
           <label class="category-title">
             <input
@@ -41,7 +60,7 @@
           </label>
         </div>
 
-        <ul class="rules">
+        <ul v-show="!categoryState[category.title].close" class="rules">
           <li
             v-for="rule in filterRules(category.rules)"
             :key="rule.ruleId"
@@ -103,6 +122,16 @@ export default {
   data() {
     return {
       categories,
+      categoryState: Object.fromEntries(
+        categories.map((c) => {
+          return [
+            c.title,
+            {
+              close: true,
+            },
+          ]
+        }),
+      ),
       parserValue: this.parser,
     }
   },
@@ -159,11 +188,37 @@ export default {
 }
 .categories {
   font-size: 14px;
+  list-style-type: none;
+}
+.category {
+  position: relative;
+}
+.category-button {
+  position: absolute;
+  left: -24px;
+  top: 2px;
+
+  background-color: transparent;
+  color: #ddd;
+  border: none;
+  appearance: none;
+  cursor: pointer;
+  padding: 0;
+}
+.category-button--close {
+  transform: rotate(90deg);
 }
 
 .category-title {
   font-size: 14px;
   font-weight: bold;
+}
+
+.eslint-plugin-vue-category .category-title {
+  color: #3eaf7c;
+}
+.eslint-category .category-title {
+  color: #8080f2;
 }
 
 .rules {
