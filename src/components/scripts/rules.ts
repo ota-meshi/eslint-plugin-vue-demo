@@ -29,8 +29,26 @@ export const categories: Category[] = [
     title: "Priority A: Essential",
     isTarget: (ruleCategories) =>
       ruleCategories &&
-      (ruleCategories.includes("vue3-essential") ||
-        ruleCategories.includes("essential")),
+      ruleCategories.includes("vue3-essential") &&
+      ruleCategories.includes("essential"),
+    rules: [],
+    classes: "eslint-plugin-vue-category",
+  },
+  {
+    title: "Priority A: Essential (for Vue.js 3.x)",
+    isTarget: (ruleCategories) =>
+      ruleCategories &&
+      ruleCategories.includes("vue3-essential") &&
+      !ruleCategories.includes("essential"),
+    rules: [],
+    classes: "eslint-plugin-vue-category",
+  },
+  {
+    title: "Priority A: Essential (for Vue.js 2.x)",
+    isTarget: (ruleCategories) =>
+      ruleCategories &&
+      !ruleCategories.includes("vue3-essential") &&
+      ruleCategories.includes("essential"),
     rules: [],
     classes: "eslint-plugin-vue-category",
   },
@@ -38,8 +56,26 @@ export const categories: Category[] = [
     title: "Priority B: Strongly Recommended",
     isTarget: (ruleCategories) =>
       ruleCategories &&
-      (ruleCategories.includes("vue3-strongly-recommended") ||
-        ruleCategories.includes("strongly-recommended")),
+      ruleCategories.includes("vue3-strongly-recommended") &&
+      ruleCategories.includes("strongly-recommended"),
+    rules: [],
+    classes: "eslint-plugin-vue-category",
+  },
+  {
+    title: "Priority B: Strongly Recommended (for Vue.js 3.x)",
+    isTarget: (ruleCategories) =>
+      ruleCategories &&
+      ruleCategories.includes("vue3-strongly-recommended") &&
+      !ruleCategories.includes("strongly-recommended"),
+    rules: [],
+    classes: "eslint-plugin-vue-category",
+  },
+  {
+    title: "Priority B: Strongly Recommended (for Vue.js 2.x)",
+    isTarget: (ruleCategories) =>
+      ruleCategories &&
+      !ruleCategories.includes("vue3-strongly-recommended") &&
+      ruleCategories.includes("strongly-recommended"),
     rules: [],
     classes: "eslint-plugin-vue-category",
   },
@@ -47,8 +83,26 @@ export const categories: Category[] = [
     title: "Priority C: Recommended",
     isTarget: (ruleCategories) =>
       ruleCategories &&
-      (ruleCategories.includes("vue3-recommended") ||
-        ruleCategories.includes("recommended")),
+      ruleCategories.includes("vue3-recommended") &&
+      ruleCategories.includes("recommended"),
+    rules: [],
+    classes: "eslint-plugin-vue-category",
+  },
+  {
+    title: "Priority C: Recommended (for Vue.js 3.x)",
+    isTarget: (ruleCategories) =>
+      ruleCategories &&
+      ruleCategories.includes("vue3-recommended") &&
+      !ruleCategories.includes("recommended"),
+    rules: [],
+    classes: "eslint-plugin-vue-category",
+  },
+  {
+    title: "Priority C: Recommended (for Vue.js 2.x)",
+    isTarget: (ruleCategories) =>
+      ruleCategories &&
+      !ruleCategories.includes("vue3-recommended") &&
+      ruleCategories.includes("recommended"),
     rules: [],
     classes: "eslint-plugin-vue-category",
   },
