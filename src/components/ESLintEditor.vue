@@ -26,14 +26,13 @@ import { parseForESLint } from "vue-eslint-parser"
 import Linter from "eslint4b"
 import type { Rule, Linter as LinterType } from "eslint"
 // @ts-expect-error -- ignore
-import { rules, processors } from "eslint-plugin-vue"
+import { rules as r, processors } from "eslint-plugin-vue"
 import type { ThisTypedComponentOptionsWithRecordProps } from "vue/types/options"
 
-// eslint-disable-next-line no-redeclare -- ignore
-declare const rules: Record<string, Rule.RuleModule>
-// eslint-disable-next-line one-var, no-redeclare -- ignore
-declare const processors: Record<string, LinterType.Processor>
-const vueProcessor = processors[".vue"]
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- ignore
+const rules: Record<string, Rule.RuleModule> = r
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access -- ignore
+const vueProcessor: LinterType.Processor = processors[".vue"]
 
 const linter = new Linter()
 linter.defineParser("vue-eslint-parser", {
