@@ -56,6 +56,7 @@ export default Vue.extend({
         require("eslint4b/package.json"),
         require("@typescript-eslint/parser/package.json"),
         require("typescript/package.json"),
+        require("eslint-plugin-vuejs-accessibility/package.json"),
       ],
     }
   },
