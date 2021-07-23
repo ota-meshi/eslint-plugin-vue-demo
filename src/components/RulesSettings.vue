@@ -222,6 +222,9 @@ export default {
 .eslint-category .category-title {
   color: #8080f2;
 }
+.eslint-plugin-vuejs-accessibility-category .category-title {
+  color: #397db1;
+}
 
 .rules {
   padding-left: 0;
@@ -241,11 +244,15 @@ export default {
 
 a {
   text-decoration: none;
-  color: #4b32c3;
 }
-
+.eslint-rule a {
+  color: #8080f2;
+}
 .eslint-plugin-vue-rule a {
   color: #3eaf7c;
+}
+.eslint-plugin-vuejs-accessibility-rule a {
+  color: #397db1;
 }
 
 .category {

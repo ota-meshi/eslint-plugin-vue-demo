@@ -21,9 +21,10 @@
               v-for="(msg, i) in messages"
               :key="msg.line + ':' + msg.column + ':' + msg.ruleId + '@' + i"
               class="message"
+              :class="getRule(msg.ruleId).classes"
             >
               [{{ msg.line }}:{{ msg.column }}]: {{ msg.message }} (<a
-                :href="getURL(msg.ruleId)"
+                :href="getRule(msg.ruleId).url"
                 target="_blank"
               >
                 {{ msg.ruleId }} </a
@@ -41,7 +42,7 @@ import type Vue from "vue"
 import ESLintEditor from "./ESLintEditor.vue"
 import RulesSettings from "./RulesSettings.vue"
 import { deserializeState, serializeState } from "./scripts/state"
-import { DEFAULT_RULES_CONFIG, getURL } from "./scripts/rules"
+import { DEFAULT_RULES_CONFIG, getRule } from "./scripts/rules"
 import type { ThisTypedComponentOptionsWithRecordProps } from "vue/types/options"
 
 const DEFAULT_CODE =
@@ -164,8 +165,8 @@ export default {
     onUpdateMessages(messages: any[]) {
       this.messages = messages
     },
-    getURL(ruleId: string) {
-      return getURL(ruleId) || ""
+    getRule(ruleId: string) {
+      return getRule(ruleId)
     },
     onUrlHashChange() {
       const serializedString =
@@ -219,8 +220,15 @@ function equalsRules(
   background-color: #282c34;
   color: #f8c555;
 }
-a {
+
+.eslint-rule a {
+  color: #8080f2;
+}
+.eslint-plugin-vue-rule a {
   color: #3eaf7c;
+}
+.eslint-plugin-vuejs-accessibility-rule a {
+  color: #397db1;
 }
 
 .playground-content > .rules-settings {

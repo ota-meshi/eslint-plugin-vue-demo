@@ -24,13 +24,13 @@ import Vue from "vue"
 import EslintEditor from "vue-eslint-editor"
 import { parseForESLint } from "vue-eslint-parser"
 import Linter from "eslint4b"
-import type { Rule, Linter as LinterType } from "eslint"
+import type { Linter as LinterType } from "eslint"
 // @ts-expect-error -- ignore
-import { rules as r, processors } from "eslint-plugin-vue"
+import { rules as vueRules, processors } from "eslint-plugin-vue"
+// @ts-expect-error -- ignore
+import { rules as a11yRules } from "eslint-plugin-vuejs-accessibility"
 import type { ThisTypedComponentOptionsWithRecordProps } from "vue/types/options"
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- ignore
-const rules: Record<string, Rule.RuleModule> = r
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access -- ignore
 const vueProcessor: LinterType.Processor = processors[".vue"]
 
@@ -38,8 +38,13 @@ const linter = new Linter()
 linter.defineParser("vue-eslint-parser", {
   parseForESLint: parseForESLint as never,
 })
-for (const ruleId of Object.keys(rules)) {
-  linter.defineRule(`vue/${ruleId}`, rules[ruleId])
+for (const ruleId of Object.keys(vueRules)) {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access -- ignore
+  linter.defineRule(`vue/${ruleId}`, vueRules[ruleId])
+}
+for (const ruleId of Object.keys(a11yRules)) {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access -- ignore
+  linter.defineRule(`vuejs-accessibility/${ruleId}`, a11yRules[ruleId])
 }
 
 const loadedParsers = new Vue({

@@ -1,20 +1,22 @@
 import Linter from "eslint4b"
 // @ts-expect-error -- ignore
 import { rules as vueRules } from "eslint-plugin-vue"
+// @ts-expect-error -- ignore
+import { rules as a11yRules } from "eslint-plugin-vuejs-accessibility"
 
 const linter = new Linter()
 
 export type Rule = {
   ruleId: string
   rule: any
-  url: string | undefined
-  classes?: string
+  url: string
+  classes: string
 }
 export type Category = {
   title: string
   rules: Rule[]
   isTarget?: (ruleCategories: string[] | void, rule: any) => boolean | void
-  classes?: string
+  classes: string
 }
 
 export const categories: Category[] = [
@@ -148,6 +150,13 @@ export const categories: Category[] = [
     rules: [],
     classes: "eslint-category",
   },
+  {
+    title: "eslint-plugin-vuejs-accessibility",
+    isTarget: (_ruleCategories, rule) =>
+      Object.values(a11yRules).includes(rule),
+    rules: [],
+    classes: "eslint-plugin-vuejs-accessibility-category",
+  },
 ]
 export const DEFAULT_RULES_CONFIG: Record<string, "error"> = {}
 
@@ -160,7 +169,7 @@ for (const baseRuleId of Object.keys(vueRules)) {
   const data: Rule = {
     ruleId,
     rule,
-    url: rule.meta.docs.url,
+    url: rule.meta.docs.url || "",
     classes: "eslint-plugin-vue-rule",
   }
   const ruleCategories = rule.meta.docs.category
@@ -175,6 +184,26 @@ for (const baseRuleId of Object.keys(vueRules)) {
     DEFAULT_RULES_CONFIG[ruleId] = "error"
   }
 }
+for (const baseRuleId of Object.keys(a11yRules)) {
+  const rule = a11yRules[baseRuleId]
+  if (rule.meta.deprecated) {
+    continue
+  }
+  const ruleId = `vuejs-accessibility/${baseRuleId}`
+  const data: Rule = {
+    ruleId,
+    rule,
+    url: rule.meta.docs.url || "",
+    classes: "eslint-plugin-vuejs-accessibility-rule",
+  }
+  categories
+    .find(
+      (c) =>
+        c.isTarget?.([], rule) &&
+        c.classes?.includes("eslint-plugin-vuejs-accessibility"),
+    )
+    ?.rules.push(data)
+}
 for (const [ruleId, rule] of linter.getRules()) {
   if (rule.meta?.deprecated) {
     continue
@@ -182,7 +211,8 @@ for (const [ruleId, rule] of linter.getRules()) {
   const data: Rule = {
     ruleId,
     rule,
-    url: rule.meta?.docs?.url,
+    url: rule.meta?.docs?.url || "",
+    classes: "eslint-rule",
   }
   const category = rule.meta?.docs?.category
   categories.find((c) => c.title === category)?.rules.push(data)
@@ -191,13 +221,35 @@ for (const [ruleId, rule] of linter.getRules()) {
     DEFAULT_RULES_CONFIG[ruleId] = "error"
   }
 }
-/** get url */
-export function getURL(ruleId: string | null): string | null | undefined {
+/** get rule */
+export function getRule(ruleId: string | null): Rule | null {
   if (!ruleId) {
     return null
   }
-  if (ruleId.startsWith("vue/")) {
-    return vueRules[ruleId.slice(4)]?.meta?.docs?.url
+  for (const category of categories) {
+    for (const rule of category.rules) {
+      if (rule.ruleId === ruleId) {
+        return rule
+      }
+    }
   }
-  return linter.getRules().get(ruleId)?.meta?.docs?.url
+  let rule: any, classes: string
+  if (ruleId.startsWith("vue/")) {
+    rule = vueRules[ruleId.slice(4)]
+    classes = "eslint-plugin-vue-rule"
+  } else if (ruleId.startsWith("vuejs-accessibility/")) {
+    rule = a11yRules[ruleId.slice(20)]
+    classes = "eslint-plugin-vuejs-accessibility-rule"
+  } else {
+    rule = linter.getRules().get(ruleId)
+    classes = "eslint-rule"
+  }
+  return rule
+    ? {
+        ruleId,
+        rule,
+        url: rule.meta?.docs?.url || "",
+        classes,
+      }
+    : null
 }
