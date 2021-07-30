@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@typescript-eslint/parser": "^4.18.0",
-    "eslint-plugin-vue": "~7.14.0",
+    "eslint-plugin-vue": "~7.15.0",
     "eslint-plugin-vuejs-accessibility": "^0.7.1",
     "eslint4b": "~7.31.0",
     "pako": "^2.0.3",
