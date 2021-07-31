@@ -13,7 +13,7 @@
     "@typescript-eslint/parser": "^4.18.0",
     "eslint-plugin-vue": "~7.15.0",
     "eslint-plugin-vuejs-accessibility": "^0.7.1",
-    "eslint4b": "~7.31.0",
+    "eslint4b": "~7.32.0",
     "pako": "^2.0.3",
     "tslib": "^2.3.0",
     "typescript": "~4.3.0",
