@@ -2,6 +2,21 @@ const path = require("path")
 process.env.VUE_APP_BUILD_AT = new Date().toLocaleString(undefined, {
   timeZoneName: "short",
 })
+
+// check for versions
+console.log(
+  [
+    require("eslint-plugin-vue/package.json"),
+    require("vue-eslint-parser/package.json"),
+    require("eslint4b/package.json"),
+    require("@typescript-eslint/parser/package.json"),
+    require("typescript/package.json"),
+    require("eslint-plugin-vuejs-accessibility/package.json"),
+  ]
+    .map((pkg) => `${pkg.name}@${pkg.version}`)
+    .join("\n"),
+)
+
 module.exports = {
   publicPath: "/eslint-plugin-vue-demo/",
   configureWebpack(_config, _isServer) {
