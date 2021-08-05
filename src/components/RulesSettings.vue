@@ -2,8 +2,8 @@
   <div class="rules-settings">
     <div class="parser">
       <label>
-        Parser:
-        <select v-model="parserValue">
+        <span class="parser-label">Parser:</span>
+        <select v-model="parserValue" class="parser-select">
           <option value="default">default</option>
           <option value="@typescript-eslint/parser">
             @typescript-eslint/parser
@@ -11,10 +11,46 @@
         </select>
       </label>
     </div>
+    <div class="tools">
+      <div class="tools-title" @click="state.toolsClose = !state.toolsClose">
+        Tools
+        <button
+          class="tools-button"
+          :class="{ 'tools-button--close': state.toolsClose }"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="10"
+            viewBox="0 0 10 10"
+            width="10"
+          >
+            <path d="M2.5 10l5-5-5-5v10z" fill="#ddd" />
+          </svg>
+        </button>
+      </div>
+      <template v-if="!state.toolsClose">
+        <div class="tool">
+          <button class="tool-button" @click="onAllOffClick">
+            Turn OFF All Rules
+          </button>
+        </div>
+        <div class="tool">
+          <label>
+            <span class="tool-label">Filter:</span>
+            <input
+              v-model="filterValue"
+              type="search"
+              placeholder="Rule Filter"
+              class="tool-form"
+            />
+          </label>
+        </div>
+      </template>
+    </div>
     <ul class="categories">
       <template v-for="category in categories">
         <li
-          v-if="filterRules(category.rules).length"
+          v-if="category.rules.length"
           :key="category.title"
           class="category"
           :class="category.classes"
@@ -42,18 +78,12 @@
             <label class="category-title">
               <input
                 :checked="
-                  filterRules(category.rules).every((rule) =>
-                    isErrorState(rule.ruleId),
-                  )
+                  category.rules.every((rule) => isErrorState(rule.ruleId))
                 "
                 type="checkbox"
                 :indeterminate.prop="
-                  !filterRules(category.rules).every((rule) =>
-                    isErrorState(rule.ruleId),
-                  ) &&
-                  !filterRules(category.rules).every(
-                    (rule) => !isErrorState(rule.ruleId),
-                  )
+                  !category.rules.every((rule) => isErrorState(rule.ruleId)) &&
+                  !category.rules.every((rule) => !isErrorState(rule.ruleId))
                 "
                 @input="onAllClick(category, $event)"
               />
@@ -123,7 +153,6 @@ export default {
   },
   data() {
     return {
-      categories,
       categoryState: Object.fromEntries(
         categories.map((c) => {
           return [
@@ -134,8 +163,26 @@ export default {
           ]
         }),
       ),
+      state: {
+        toolsClose: true,
+      },
       parserValue: this.parser,
+      filterValue: "",
     }
+  },
+  computed: {
+    categories(): Category[] {
+      return categories.map((c) => {
+        let rules = this.filterRules(c.rules)
+        if (this.filterValue) {
+          rules = rules.filter((r) => r.ruleId.includes(this.filterValue))
+        }
+        return {
+          ...c,
+          rules,
+        }
+      })
+    },
   },
   watch: {
     parser() {
@@ -162,6 +209,9 @@ export default {
       }
       this.$emit("update:rules", rules)
     },
+    onAllOffClick() {
+      this.$emit("update:rules", {})
+    },
     onClick(ruleId: string, e: MouseEvent) {
       const rules = Object.assign({}, this.rules)
       if ((e.target as HTMLInputElement).checked) {
@@ -177,17 +227,58 @@ export default {
   },
 } as ThisTypedComponentOptionsWithRecordProps<
   Vue,
-  { categories: Category[]; parserValue: string },
+  { parserValue: string; filterValue: string },
   { filterRules: (rules: Rule[]) => Rule[] },
-  { serializedString: string },
+  { categories: Category[] },
   { rules: Record<string, "error" | "off" | 2>; parser: string }
 >
 </script>
 
 <style scoped>
-.parser {
+.tools {
+  background-color: #222;
+}
+.tool {
+  display: flex;
+}
+.tool,
+.parser,
+.tools-title {
   padding: 4px;
 }
+
+.tool > label,
+.parser > label {
+  display: flex;
+  width: 100%;
+}
+.tool > button {
+  margin: auto;
+}
+.tool-label,
+.parser-label {
+  width: 3.5rem;
+  flex-shrink: 0;
+}
+.tool-form,
+.parser-select {
+  width: 100%;
+}
+.tools-button {
+  background-color: transparent;
+  color: #ddd;
+  border: none;
+  appearance: none;
+  cursor: pointer;
+  padding: 0;
+}
+.tools-button--close {
+  transform: rotate(90deg);
+}
+.filter .tool-label {
+  color: #ddd;
+}
+
 .categories {
   font-size: 14px;
   list-style-type: none;
