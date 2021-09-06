@@ -24,7 +24,7 @@ function getEnabledRules(
 export function serializeState(state: {
   code?: string
   rules?: Record<string, "error" | "off">
-  parser?: string
+  parser?: string | Record<string, string>
 }): string {
   const saveData = {
     code: state.code,

@@ -108,12 +108,13 @@ type Component = ThisTypedComponentOptionsWithRecordProps<
     config: any
     preprocess: any
     postprocess: any
-    resolvedParser: string | undefined
+    resolvedParser: string | Record<string, string> | undefined
+    parserList: string[]
   },
   {
     value: string
     rules: Record<string, "error" | "off" | 2>
-    parser: string | undefined
+    parser: string | Record<string, string> | undefined
   }
 >
 export default {
@@ -130,13 +131,23 @@ export default {
       },
     },
     parser: {
-      type: String,
+      type: [String, Object],
       default: undefined,
     },
   },
   computed: {
     resolvedParser() {
-      return !this.parser || this.parser === "default" ? undefined : this.parser
+      return !this.parser || this.parser === "espree" ? undefined : this.parser
+    },
+    parserList(): string[] {
+      const parser = this.resolvedParser
+      if (!parser) {
+        return []
+      }
+      if (typeof parser === "string") {
+        return [parser]
+      }
+      return Object.values(parser)
     },
     // eslint-disable-next-line @typescript-eslint/unbound-method -- ignore
     preprocess: () => vueProcessor.preprocess,
@@ -146,14 +157,17 @@ export default {
       if (!this.resolvedParser) {
         return linter
       }
-      if (loadedParsers.parsers[this.resolvedParser]) {
-        return linter
-      }
-      loadParser(this.resolvedParser).catch((e) => {
-        throw e
-      })
+      for (const parser of this.parserList) {
+        if (!loadedParsers.parsers[parser]) {
+          loadParser(parser).catch((e) => {
+            throw e
+          })
 
-      return null
+          return null
+        }
+      }
+
+      return linter
     },
     config() {
       return {

@@ -21,10 +21,10 @@
               v-for="(msg, i) in messages"
               :key="msg.line + ':' + msg.column + ':' + msg.ruleId + '@' + i"
               class="message"
-              :class="getRule(msg.ruleId).classes"
+              :class="msg.ruleId && getRule(msg.ruleId).classes"
             >
               [{{ msg.line }}:{{ msg.column }}]: {{ msg.message }} (<a
-                :href="getRule(msg.ruleId).url"
+                :href="msg.ruleId && getRule(msg.ruleId).url"
                 target="_blank"
               >
                 {{ msg.ruleId }} </a
@@ -103,7 +103,7 @@ const buttonPointerEvents = computed(() =>
 type Data = {
   code: string
   rules: Record<string, "error" | "off">
-  parser: string
+  parser: string | Record<string, string>
   messages: any[]
 }
 type Methods = {
@@ -123,7 +123,7 @@ export default {
       code: state.code || DEFAULT_CODE,
       rules: state.rules || { ...DEFAULT_RULES_CONFIG },
       messages: [],
-      parser: state.parser || "default",
+      parser: state.parser || "espree",
     }
   },
   computed: {
@@ -135,7 +135,7 @@ export default {
         ? undefined
         : this.rules
       const parser =
-        !this.parser || this.parser === "default" ? undefined : this.parser
+        !this.parser || this.parser === "espree" ? undefined : this.parser
       const serializedString = serializeState({
         code,
         rules,

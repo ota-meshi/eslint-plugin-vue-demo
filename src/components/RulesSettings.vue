@@ -3,10 +3,9 @@
     <div class="parser">
       <label>
         <span class="parser-label">Parser:</span>
-        <select v-model="parserValue" class="parser-select">
-          <option value="default">default</option>
-          <option value="@typescript-eslint/parser">
-            @typescript-eslint/parser
+        <select v-model="parserIndex" class="parser-select">
+          <option v-for="(parser, i) in PARSERS" :key="i" :value="i">
+            {{ parser }}
           </option>
         </select>
       </label>
@@ -29,22 +28,35 @@
         </button>
       </div>
       <template v-if="!state.toolsClose">
-        <div class="tool">
-          <button class="tool-button" @click="onAllOffClick">
-            Turn OFF All Rules
-          </button>
-        </div>
-        <div class="tool">
-          <label>
-            <span class="tool-label">Filter:</span>
-            <input
-              v-model="filterValue"
-              type="search"
-              placeholder="Rule Filter"
-              class="tool-form"
-            />
-          </label>
-        </div>
+        <label class="tool">
+          <span class="tool-label">Filter:</span>
+          <input
+            v-model="filterValue"
+            type="search"
+            placeholder="Rule Filter"
+            class="tool-form"
+          />
+        </label>
+        <label class="tool">
+          <input
+            :checked="
+              categories.every((category) =>
+                category.rules.every((rule) => isErrorState(rule.ruleId)),
+              )
+            "
+            type="checkbox"
+            :indeterminate.prop="
+              categories.some((category) =>
+                category.rules.some((rule) => isErrorState(rule.ruleId)),
+              ) &&
+              categories.some((category) =>
+                category.rules.some((rule) => !isErrorState(rule.ruleId)),
+              )
+            "
+            @input="onAllClick($event)"
+          />
+          <span>All Rules</span>
+        </label>
       </template>
     </div>
     <ul class="categories">
@@ -85,7 +97,7 @@
                   !category.rules.every((rule) => isErrorState(rule.ruleId)) &&
                   !category.rules.every((rule) => !isErrorState(rule.ruleId))
                 "
-                @input="onAllClick(category, $event)"
+                @input="onCategoryClick(category, $event)"
               />
               {{ category.title }}
             </label>
@@ -93,7 +105,7 @@
 
           <ul v-show="!categoryState[category.title].close" class="rules">
             <li
-              v-for="rule in filterRules(category.rules)"
+              v-for="rule in category.rules"
               :key="rule.ruleId"
               class="rule"
               :class="rule.classes"
@@ -140,6 +152,11 @@ import type { ThisTypedComponentOptionsWithRecordProps } from "vue/types/options
 import type { Rule, Category } from "./scripts/rules"
 import { categories } from "./scripts/rules"
 
+const PARSERS = [
+  { ts: "@typescript-eslint/parser" },
+  "espree",
+  "@typescript-eslint/parser",
+]
 export default {
   name: "RulesSettings",
   props: {
@@ -148,11 +165,16 @@ export default {
       required: true,
     },
     parser: {
-      type: String,
+      type: [String, Object],
     },
   },
   data() {
+    let parserIndex = PARSERS.findIndex((p) => deppEq(p, this.parser))
+    if (parserIndex < 0) {
+      parserIndex = 0
+    }
     return {
+      PARSERS,
       categoryState: Object.fromEntries(
         categories.map((c) => {
           return [
@@ -166,17 +188,14 @@ export default {
       state: {
         toolsClose: true,
       },
-      parserValue: this.parser,
+      parserIndex,
       filterValue: "",
     }
   },
   computed: {
     categories(): Category[] {
       return categories.map((c) => {
-        let rules = this.filterRules(c.rules)
-        if (this.filterValue) {
-          rules = rules.filter((r) => r.ruleId.includes(this.filterValue))
-        }
+        const rules = this.filterRules(c.rules)
         return {
           ...c,
           rules,
@@ -186,21 +205,31 @@ export default {
   },
   watch: {
     parser() {
-      this.parserValue = this.parser
+      this.parserIndex = PARSERS.findIndex((p) => deppEq(p, this.parser))
+      if (this.parserIndex < 0) {
+        this.parserIndex = 0
+      }
     },
-    parserValue() {
-      if (this.parserValue !== this.parser) {
-        this.$emit("update:parser", this.parserValue)
+    parserIndex() {
+      const parser = PARSERS[this.parserIndex]
+      if (!deppEq(parser, this.parser)) {
+        this.$emit("update:parser", parser)
       }
     },
   },
   methods: {
     filterRules(rules: Rule[]) {
-      return rules.filter((rule) => rule.ruleId !== "jsonc/auto")
+      let filteredRules = rules
+      if (this.filterValue) {
+        filteredRules = filteredRules.filter((r) =>
+          r.ruleId.includes(this.filterValue),
+        )
+      }
+      return filteredRules
     },
-    onAllClick(category: Category, e: MouseEvent) {
+    onCategoryClick(category: Category, e: MouseEvent) {
       const rules = Object.assign({}, this.rules)
-      for (const rule of this.filterRules(category.rules)) {
+      for (const rule of category.rules) {
         if ((e.target as HTMLInputElement).checked) {
           rules[rule.ruleId] = "error"
         } else {
@@ -209,8 +238,18 @@ export default {
       }
       this.$emit("update:rules", rules)
     },
-    onAllOffClick() {
-      this.$emit("update:rules", {})
+    onAllClick(e: MouseEvent) {
+      const rules = Object.assign({}, this.rules)
+      for (const category of this.categories) {
+        for (const rule of category.rules) {
+          if ((e.target as HTMLInputElement).checked) {
+            rules[rule.ruleId] = "error"
+          } else {
+            delete rules[rule.ruleId]
+          }
+        }
+      }
+      this.$emit("update:rules", rules)
     },
     onClick(ruleId: string, e: MouseEvent) {
       const rules = Object.assign({}, this.rules)
@@ -227,11 +266,43 @@ export default {
   },
 } as ThisTypedComponentOptionsWithRecordProps<
   Vue,
-  { parserValue: string; filterValue: string },
+  { parserIndex: number; filterValue: string },
   { filterRules: (rules: Rule[]) => Rule[] },
   { categories: Category[] },
-  { rules: Record<string, "error" | "off" | 2>; parser: string }
+  {
+    rules: Record<string, "error" | "off" | 2>
+    parser: string | Record<string, string>
+  }
 >
+
+/**
+ * Checks whether the given values is equals
+ */
+function deppEq(a: any, b: any): boolean {
+  if (a === b) {
+    return true
+  }
+  if (
+    a == null ||
+    b == null ||
+    typeof a !== "object" ||
+    typeof b !== "object"
+  ) {
+    return false
+  }
+  const aKeys = Object.keys(a)
+  const bKeys = Object.keys(b)
+  if (aKeys.length !== bKeys.length) {
+    return false
+  }
+  for (const key of aKeys) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access -- ignore
+    if (!aKeys.includes(key) || !deppEq(a[key], b[key])) {
+      return false
+    }
+  }
+  return true
+}
 </script>
 
 <style scoped>
@@ -247,13 +318,9 @@ export default {
   padding: 4px;
 }
 
-.tool > label,
 .parser > label {
   display: flex;
   width: 100%;
-}
-.tool > button {
-  margin: auto;
 }
 .tool-label,
 .parser-label {
