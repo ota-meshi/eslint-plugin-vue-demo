@@ -290,7 +290,9 @@ function deppEq(a: any, b: any): boolean {
   ) {
     return false
   }
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument -- ignore
   const aKeys = Object.keys(a)
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument -- ignore
   const bKeys = Object.keys(b)
   if (aKeys.length !== bKeys.length) {
     return false

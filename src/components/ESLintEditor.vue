@@ -23,7 +23,7 @@
 import Vue from "vue"
 import EslintEditor from "vue-eslint-editor"
 import { parseForESLint } from "vue-eslint-parser"
-import Linter from "eslint4b"
+import { Linter } from "eslint"
 import type { Linter as LinterType } from "eslint"
 // @ts-expect-error -- ignore
 import { rules as vueRules, processors } from "eslint-plugin-vue"
@@ -38,12 +38,14 @@ const linter = new Linter()
 linter.defineParser("vue-eslint-parser", {
   parseForESLint: parseForESLint as never,
 })
+// eslint-disable-next-line @typescript-eslint/no-unsafe-argument -- ignore
 for (const ruleId of Object.keys(vueRules)) {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access -- ignore
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument -- ignore
   linter.defineRule(`vue/${ruleId}`, vueRules[ruleId])
 }
+// eslint-disable-next-line @typescript-eslint/no-unsafe-argument -- ignore
 for (const ruleId of Object.keys(a11yRules)) {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access -- ignore
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument -- ignore
   linter.defineRule(`vuejs-accessibility/${ruleId}`, a11yRules[ruleId])
 }
 
@@ -75,10 +77,10 @@ async function loadParser(parser: string) {
 const verifyAndFix = linter.verifyAndFix
 
 linter.verifyAndFix = function (
-  code: any,
-  config: any,
-  option: any,
-  ...args: any[]
+  code: string,
+  config: LinterType.Config,
+  option: LinterType.LintOptions,
+  ...args: []
 ) {
   /* eslint-disable no-invalid-this -- ignore */
   return verifyAndFix.call(
@@ -87,13 +89,14 @@ linter.verifyAndFix = function (
     code,
     config,
     {
-      // eslint-disable-next-line @typescript-eslint/unbound-method -- ignore
+      /* eslint-disable @typescript-eslint/unbound-method -- ignore */
+      // @ts-expect-error -- ignore
       preprocess: vueProcessor.preprocess,
-      // eslint-disable-next-line @typescript-eslint/unbound-method -- ignore
+      // @ts-expect-error -- ignore
       postprocess: vueProcessor.postprocess,
+      /* eslint-enable @typescript-eslint/unbound-method -- ignore */
       ...option,
     },
-    // @ts-expect-error -- ignore
     ...args,
   )
   /* eslint-enable no-invalid-this -- ignore */

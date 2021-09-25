@@ -8,7 +8,7 @@ console.log(
   [
     require("eslint-plugin-vue/package.json"),
     require("vue-eslint-parser/package.json"),
-    require("eslint4b/package.json"),
+    require("eslint/package.json"),
     require("@typescript-eslint/parser/package.json"),
     require("typescript/package.json"),
     require("eslint-plugin-vuejs-accessibility/package.json"),
@@ -24,9 +24,12 @@ module.exports = {
       resolve: {
         alias: {
           module: path.resolve("./shim/module.js"),
-          eslint$: path.resolve("./shim/eslint/index.js"),
-          eslint: path.resolve("./shim/eslint"),
           globby: path.resolve("./shim/empty"),
+          eslint$: path.resolve("./shim/eslint/index.js"),
+          esquery: path.resolve("./node_modules/esquery/dist/esquery.min.js"),
+          "@eslint/eslintrc/universal": path.resolve(
+            "./node_modules/@eslint/eslintrc/dist/eslintrc-universal.cjs",
+          ),
         },
       },
       module: {

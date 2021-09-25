@@ -1,10 +1,11 @@
-import Linter from "eslint4b"
+import { Linter } from "eslint"
 // @ts-expect-error -- ignore
 import { rules as vueRules } from "eslint-plugin-vue"
 // @ts-expect-error -- ignore
 import { rules as a11yRules } from "eslint-plugin-vuejs-accessibility"
 
 const linter = new Linter()
+const coreRules = new Set(linter.getRules().values())
 
 export type Rule = {
   ruleId: string
@@ -110,43 +111,36 @@ export const categories: Category[] = [
   },
   {
     title: "Uncategorized",
-    isTarget: (_ruleCategories, rule) => !rule.meta.docs.extensionRule,
+    isTarget: (_ruleCategories, rule) =>
+      Object.values(vueRules).includes(rule) && !rule.meta.docs.extensionRule,
     rules: [],
     classes: "eslint-plugin-vue-category",
   },
   {
     title: "Extension Rules",
-    isTarget: (_ruleCategories, rule) => rule.meta.docs.extensionRule,
+    isTarget: (_ruleCategories, rule) =>
+      Object.values(vueRules).includes(rule) && rule.meta.docs.extensionRule,
     rules: [],
     classes: "eslint-plugin-vue-category",
   },
   {
     title: "Possible Errors",
+    isTarget: (_ruleCategories, rule) =>
+      coreRules.has(rule) && rule.meta.type === "problem",
     rules: [],
     classes: "eslint-category",
   },
   {
-    title: "Best Practices",
+    title: "Suggestions",
+    isTarget: (_ruleCategories, rule) =>
+      coreRules.has(rule) && rule.meta.type === "suggestion",
     rules: [],
     classes: "eslint-category",
   },
   {
-    title: "Strict Mode",
-    rules: [],
-    classes: "eslint-category",
-  },
-  {
-    title: "Variables",
-    rules: [],
-    classes: "eslint-category",
-  },
-  {
-    title: "Stylistic Issues",
-    rules: [],
-    classes: "eslint-category",
-  },
-  {
-    title: "ECMAScript 6",
+    title: "Layout & Formatting",
+    isTarget: (_ruleCategories, rule) =>
+      coreRules.has(rule) && rule.meta.type === "layout",
     rules: [],
     classes: "eslint-category",
   },
@@ -214,8 +208,7 @@ for (const [ruleId, rule] of linter.getRules()) {
     url: rule.meta?.docs?.url || "",
     classes: "eslint-rule",
   }
-  const category = rule.meta?.docs?.category
-  categories.find((c) => c.title === category)?.rules.push(data)
+  categories.find((c) => c.isTarget?.([], rule))?.rules.push(data)
 
   if (rule.meta?.docs?.recommended) {
     DEFAULT_RULES_CONFIG[ruleId] = "error"
