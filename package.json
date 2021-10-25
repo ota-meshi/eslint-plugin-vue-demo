@@ -10,7 +10,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@typescript-eslint/parser": "~5.1.0",
+    "@typescript-eslint/parser": "~5.2.0",
     "eslint": "~8.1.0",
     "eslint-plugin-vue": "~7.20.0",
     "eslint-plugin-vuejs-accessibility": "~1.1.0",
