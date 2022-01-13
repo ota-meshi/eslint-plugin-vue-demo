@@ -1,5 +1,9 @@
 {
-  "extends": ["config:base", ":preserveSemverRanges"],
+  "extends": [
+    "config:base",
+    ":preserveSemverRanges",
+    ":disableDependencyDashboard"
+  ],
   "packageRules": [
     {
       "updateTypes": ["major", "minor", "patch", "pin", "digest"],
