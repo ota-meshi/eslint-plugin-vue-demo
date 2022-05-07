@@ -108,7 +108,12 @@ type Data = {
 
 export default defineComponent<
   {},
-  Data & { serializedString: string; onUrlHashChange: () => void }
+  Data & {
+    serializedString: string
+    onUpdateMessages: (messages: any[]) => void
+    onUrlHashChange: () => void
+    getRule: typeof getRule
+  }
 >({
   name: "ESLintPlayground",
   components: {
@@ -156,7 +161,7 @@ export default defineComponent<
       window.addEventListener("hashchange", this.onUrlHashChange)
     }
   },
-  beforeDestroey() {
+  beforeUnmount() {
     if (typeof window !== "undefined") {
       window.removeEventListener("hashchange", this.onUrlHashChange)
     }

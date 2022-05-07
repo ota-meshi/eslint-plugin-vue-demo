@@ -53,7 +53,7 @@
                 category.rules.some((rule) => !isErrorState(rule.ruleId)),
               )
             "
-            @input="onAllClick($event)"
+            @input="onAllClick($event as MouseEvent)"
           />
           <span>All Rules</span>
         </label>
@@ -97,7 +97,7 @@
                   !category.rules.every((rule) => isErrorState(rule.ruleId)) &&
                   !category.rules.every((rule) => !isErrorState(rule.ruleId))
                 "
-                @input="onCategoryClick(category, $event)"
+                @input="onCategoryClick(category, $event as MouseEvent)"
               />
               {{ category.title }}
             </label>
@@ -114,7 +114,7 @@
                 <input
                   :checked="isErrorState(rule.ruleId)"
                   type="checkbox"
-                  @input="onClick(rule.ruleId, $event)"
+                  @input="onClick(rule.ruleId, $event as MouseEvent)"
                 />
                 {{ rule.ruleId }}
               </label>

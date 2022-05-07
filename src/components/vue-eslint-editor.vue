@@ -1,7 +1,7 @@
 <template>
   <div :class="{ 'eslint-editor-dark': dark }" class="eslint-editor-root">
     <!-- eslint-disable-line @mysticatea/prettier, @mysticatea/vue/comma-dangle, @mysticatea/vue/multiline-html-element-content-newline -->
-    <transition name="eslint-editor-fade" @before-enter="fadeIn">
+    <Transition name="eslint-editor-fade" @before-enter="fadeIn">
       <div
         v-if="loadedMonaco"
         key="editor"
@@ -21,7 +21,7 @@
       </div>
       <div v-else key="placeholder" class="eslint-editor-swap-container">
         <code class="eslint-editor-placeholder-code">{{ code }}</code>
-        <transition name="eslint-editor-fade">
+        <Transition name="eslint-editor-fade">
           <div
             v-if="monacoLoadingError"
             key="error"
@@ -39,9 +39,9 @@
               Now loading...
             </div>
           </div>
-        </transition>
+        </Transition>
       </div>
-    </transition>
+    </Transition>
   </div>
 </template>
 
