@@ -3,8 +3,8 @@
     <div class="playground-content">
       <RulesSettings
         ref="settings"
-        :rules.sync="rules"
-        :parser.sync="parser"
+        v-model:rules="rules"
+        v-model:parser="parser"
         class="rules-settings"
       />
       <div class="editor-content">
@@ -38,12 +38,11 @@
 </template>
 
 <script lang="ts">
-import type Vue from "vue"
+import { defineComponent } from "vue"
 import ESLintEditor from "./ESLintEditor.vue"
 import RulesSettings from "./RulesSettings.vue"
 import { deserializeState, serializeState } from "./scripts/state"
 import { DEFAULT_RULES_CONFIG, getRule } from "./scripts/rules"
-import type { ThisTypedComponentOptionsWithRecordProps } from "vue/types/options"
 
 const DEFAULT_CODE =
   `<template>
@@ -106,10 +105,11 @@ type Data = {
   parser: string | Record<string, string>
   messages: any[]
 }
-type Methods = {
-  onUrlHashChange: () => void
-}
-export default {
+
+export default defineComponent<
+  {},
+  Data & { serializedString: string; onUrlHashChange: () => void }
+>({
   name: "ESLintPlayground",
   components: {
     ESLintEditor,
@@ -178,13 +178,7 @@ export default {
       }
     },
   },
-} as ThisTypedComponentOptionsWithRecordProps<
-  Vue,
-  Data,
-  Methods,
-  { serializedString: string },
-  {}
->
+})
 
 /** */
 function equalsRules(

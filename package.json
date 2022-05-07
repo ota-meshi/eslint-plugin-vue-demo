@@ -11,10 +11,12 @@
   },
   "dependencies": {
     "@typescript-eslint/parser": "~5.22.0",
+    "assert": "^2.0.0",
     "eslint": "~8.14.0",
     "eslint-plugin-vue": "~8.7.0",
     "eslint-plugin-vuejs-accessibility": "~1.1.0",
     "pako": "^2.0.3",
+    "path-browserify": "^1.0.1",
     "tslib": "^2.3.0",
     "typescript": "~4.6.0",
     "vue": "^3.0.0",
@@ -38,7 +40,6 @@
     "eslint-plugin-regexp": "^1.0.0",
     "eslint-plugin-yml": "^0.14.0",
     "prettier": "^2.3.2",
-    "string-replace-loader": "^3.0.3",
-    "vue-template-compiler": "^2.6.11"
+    "string-replace-loader": "^3.0.3"
   }
 }
