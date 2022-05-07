@@ -4,8 +4,8 @@
       <label>
         <span class="parser-label">Parser:</span>
         <select v-model="parserIndex" class="parser-select">
-          <option v-for="(parser, i) in PARSERS" :key="i" :value="i">
-            {{ parser }}
+          <option v-for="(optParser, i) in PARSERS" :key="i" :value="i">
+            {{ optParser }}
           </option>
         </select>
       </label>
@@ -147,8 +147,7 @@
 </template>
 
 <script lang="ts">
-import type Vue from "vue"
-import type { ThisTypedComponentOptionsWithRecordProps } from "vue/types/options"
+import { defineComponent } from "vue"
 import type { Rule, Category } from "./scripts/rules"
 import { categories } from "./scripts/rules"
 
@@ -157,7 +156,7 @@ const PARSERS = [
   "espree",
   "@typescript-eslint/parser",
 ]
-export default {
+export default defineComponent({
   name: "RulesSettings",
   props: {
     rules: {
@@ -166,8 +165,10 @@ export default {
     },
     parser: {
       type: [String, Object],
+      default: undefined,
     },
   },
+  emits: ["update:rules", "update:parser"],
   data() {
     let parserIndex = PARSERS.findIndex((p) => deppEq(p, this.parser))
     if (parserIndex < 0) {
@@ -264,16 +265,18 @@ export default {
       return this.rules[ruleId] === "error" || this.rules[ruleId] === 2
     },
   },
-} as ThisTypedComponentOptionsWithRecordProps<
-  Vue,
-  { parserIndex: number; filterValue: string },
-  { filterRules: (rules: Rule[]) => Rule[] },
-  { categories: Category[] },
-  {
-    rules: Record<string, "error" | "off" | 2>
-    parser: string | Record<string, string>
-  }
->
+})
+
+// as ThisTypedComponentOptionsWithRecordProps<
+//   Vue,
+//   { parserIndex: number; filterValue: string },
+//   { filterRules: (rules: Rule[]) => Rule[] },
+//   { categories: Category[] },
+//   {
+//     rules: Record<string, "error" | "off" | 2>
+//     parser: string | Record<string, string>
+//   }
+// >
 
 /**
  * Checks whether the given values is equals

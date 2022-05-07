@@ -31,6 +31,11 @@ module.exports = {
             "./node_modules/@eslint/eslintrc/dist/eslintrc-universal.cjs",
           ),
         },
+        fallback: {
+          assert: require.resolve("assert/"),
+          path: require.resolve("path-browserify"),
+          fs: false,
+        },
       },
       module: {
         rules: [

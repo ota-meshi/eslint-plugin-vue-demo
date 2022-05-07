@@ -5,7 +5,7 @@ module.exports = {
   },
   extends: [
     "plugin:@ota-meshi/recommended",
-    "plugin:@ota-meshi/+vue2",
+    "plugin:@ota-meshi/+vue3",
     "plugin:@ota-meshi/+node",
     "plugin:@ota-meshi/+typescript",
     "plugin:@ota-meshi/+json",
@@ -48,6 +48,7 @@ module.exports = {
       parserOptions: {
         parser: {
           ts: "@typescript-eslint/parser",
+          js: "@typescript-eslint/parser",
         },
         sourceType: "module",
         project: "./tsconfig.json",
@@ -154,6 +155,7 @@ module.exports = {
           "error",
           { argsIgnorePattern: "^_" },
         ],
+        "@typescript-eslint/no-unsafe-assignment": "off",
       },
     },
   ],

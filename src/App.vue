@@ -4,8 +4,8 @@
       <img class="logo" alt="Vue logo" src="./assets/logo.png" />
       <div class="site-name">eslint-plugin-vue Online Playground</div>
       <div class="packages-info">
-        <template v-for="pkg in packages">
-          <a :key="pkg.name" :href="pkg.homepage" target="_blank"
+        <template v-for="pkg in packages" :key="pkg.name">
+          <a :href="pkg.homepage" target="_blank"
             >{{ pkg.name }}@{{ pkg.version }}</a
           >
         </template>
@@ -38,17 +38,17 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue"
+import { defineComponent } from "vue"
 import ESLintPlayground from "./components/ESLintPlayground.vue"
 
-export default Vue.extend({
+export default defineComponent({
   name: "App",
   components: {
     ESLintPlayground,
   },
   data() {
     return {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access -- env
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access -- env
       buildAt: process.env.VUE_APP_BUILD_AT,
       packages: [
         require("eslint-plugin-vue/package.json"),
