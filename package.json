@@ -12,7 +12,7 @@
   "dependencies": {
     "@typescript-eslint/parser": "~5.30.0",
     "assert": "^2.0.0",
-    "eslint": "~8.18.0",
+    "eslint": "~8.19.0",
     "eslint-plugin-vue": "~9.1.0",
     "eslint-plugin-vuejs-accessibility": "~1.2.0",
     "pako": "^2.0.3",
