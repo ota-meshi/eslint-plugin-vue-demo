@@ -21,10 +21,10 @@
               v-for="(msg, i) in messages"
               :key="msg.line + ':' + msg.column + ':' + msg.ruleId + '@' + i"
               class="message"
-              :class="msg.ruleId && getRule(msg.ruleId).classes"
+              :class="msg.ruleId && getRule(msg.ruleId)!.classes"
             >
               [{{ msg.line }}:{{ msg.column }}]: {{ msg.message }} (<a
-                :href="msg.ruleId && getRule(msg.ruleId).url"
+                :href="msg.ruleId && getRule(msg.ruleId)!.url"
                 target="_blank"
               >
                 {{ msg.ruleId }} </a

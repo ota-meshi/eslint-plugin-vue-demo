@@ -1,128 +1,57 @@
 <template>
-  <div :class="{ 'eslint-editor-dark': dark }" class="eslint-editor-root">
-    <!-- eslint-disable-line @mysticatea/prettier, @mysticatea/vue/comma-dangle, @mysticatea/vue/multiline-html-element-content-newline -->
-    <Transition name="eslint-editor-fade" @before-enter="fadeIn">
-      <div
-        v-if="loadedMonaco"
-        key="editor"
-        class="eslint-editor-swap-container"
-      >
-        <div ref="monaco" class="eslint-editor-monaco" />
-        <div v-if="fix" class="eslint-editor-actions">
-          <label>
-            <input
-              v-model="previewFix"
-              type="checkbox"
-            /><!-- eslint-disable-line @mysticatea/prettier -->
-            Preview
-          </label>
-          <button @click="applyAutofix">Apply</button>
-        </div>
+  <MonacoEditor
+    ref="monacoEditor"
+    v-model="editorValue"
+    :right-code="fixedCode"
+    :markers="markers"
+    :right-markers="rightMarkers"
+    :provide-code-actions="provideCodeActions"
+    :diff-editor="previewFix"
+    :language="language"
+    @mounted-editor="initialize"
+  >
+    <template #actions>
+      <div v-if="fix" class="eslint-editor-actions">
+        <label>
+          <input
+            v-model="previewFix"
+            type="checkbox"
+          /><!-- eslint-disable-line @mysticatea/prettier -->
+          Preview
+        </label>
+        <button @click="applyAutofix">Apply</button>
       </div>
-      <div v-else key="placeholder" class="eslint-editor-swap-container">
-        <code class="eslint-editor-placeholder-code">{{ code }}</code>
-        <Transition name="eslint-editor-fade">
-          <div
-            v-if="monacoLoadingError"
-            key="error"
-            class="eslint-editor-placeholder-error"
-          >
-            Failed to load this editor
-          </div>
-          <div v-else key="loading" class="eslint-editor-placeholder-loading">
-            <div class="eslint-editor-placeholder-loading-icon">
-              <div />
-              <div />
-              <div />
-            </div>
-            <div class="eslint-editor-placeholder-loading-message">
-              Now loading...
-            </div>
-          </div>
-        </Transition>
-      </div>
-    </Transition>
-  </div>
+    </template>
+  </MonacoEditor>
 </template>
 
-<script>
-/* eslint
-  @typescript-eslint/no-unsafe-member-access: 0,
-  @typescript-eslint/no-unsafe-call: 0,
-  @typescript-eslint/restrict-template-expressions: 0,
-  @typescript-eslint/explicit-module-boundary-types: 0,
-  @typescript-eslint/no-unsafe-return: 0,
-  @typescript-eslint/unbound-method: 0,
--- ignore */
-import { shallowReactive } from "vue"
-const EDITOR_OPTS = {
-  autoIndent: true,
-  automaticLayout: true,
-  find: {
-    autoFindInSelection: true,
-    seedSearchStringFromSelection: true,
-  },
-  minimap: { enabled: false },
-  renderControlCharacters: true,
-  renderIndentGuides: true,
-  renderValidationDecorations: "on",
-  renderWhitespace: "boundary",
-  scrollBeyondLastLine: false,
-}
+<script lang="ts">
+import type {
+  MonacoEditor as TEditor,
+  MonacoEditorLanguages,
+} from "@ota-meshi/site-kit-monaco-editor"
+import type { ProvideCodeActions } from "@ota-meshi/site-kit-monaco-editor"
+import type { Linter } from "eslint"
+import { defineComponent } from "vue"
+import MonacoEditor from "@ota-meshi/site-kit-monaco-editor-vue/MonacoEditor.vue"
+type VIMonacoEditor = InstanceType<typeof MonacoEditor>
 
 /**
  * Ensure that a given value is a positive value.
- * @param {number|undefined} value The value to check.
- * @param {number} defaultValue The default value which is used if the `value` is undefined.
- * @returns {number} The positive value as the result.
+ * @param value The value to check.
+ * @param defaultValue The default value which is used if the `value` is undefined.
+ * @returns The positive value as the result.
  */
-function ensurePositiveInt(value, defaultValue) {
+function ensurePositiveInt(value: number | undefined, defaultValue: number) {
   return Math.max(1, (value !== undefined ? value : defaultValue) | 0)
 }
 
 /**
- * Update the value of a given editor.
- * @param {monaco.editor.IStandaloneEditor} editor The editor to update.
- * @param {string} value The new value.
- * @returns {void}
- */
-function updateValue(editor, value) {
-  const model = editor.getModel()
-  if (model != null && value !== model.getValue()) {
-    model.setValue(value)
-  }
-}
-
-/**
- * Dispose.
- * @param {any} x The target object.
- * @returns {void}
- */
-function dispose(x) {
-  if (x == null) {
-    return
-  }
-
-  if (x.getOriginalEditor) {
-    dispose(x.getOriginalEditor())
-  }
-  if (x.getModifiedEditor) {
-    dispose(x.getModifiedEditor())
-  }
-  if (x.getModel) {
-    dispose(x.getModel())
-  }
-  if (x.dispose) {
-    x.dispose()
-  }
-}
-
-/**
  * Computes the key string from the given marker.
- * @param {import('monaco-editor').editor.IMarkerData} marker marker
- * @returns {string} the key string
+ * @param marker marker
+ * @returns the key string
  */
-function computeKey(marker) {
+function computeKey(marker: TEditor.IMarkerData) {
   const code =
     (typeof marker.code === "string"
       ? marker.code
@@ -132,13 +61,14 @@ function computeKey(marker) {
 
 /**
  * Create quickfix code action.
- * @param {string} title title
- * @param {import('monaco-editor').editor.IMarkerData} marker marker
- * @param {import('monaco-editor').editor.ITextModel} model model
- * @param { { range: [number, number], text: string } } fix fix data
- * @returns {import('monaco-editor').languages.CodeAction} CodeAction
+ * @returns CodeAction
  */
-function createQuickfixCodeAction(title, marker, model, fix) {
+function createQuickfixCodeAction(
+  title: string,
+  marker: TEditor.IMarkerData,
+  model: TEditor.ITextModel,
+  fix: { range: [number, number]; text: string },
+): MonacoEditorLanguages.CodeAction {
   const start = model.getPositionAt(fix.range[0])
   const end = model.getPositionAt(fix.range[1])
   /**
@@ -158,27 +88,25 @@ function createQuickfixCodeAction(title, marker, model, fix) {
       edits: [
         {
           resource: model.uri,
-          edit: {
+          textEdit: {
             range: editRange,
             text: fix.text,
           },
+          versionId: model.getVersionId(),
         },
       ],
     },
   }
 }
 
-export default {
+export default defineComponent({
   name: "ESLintEditor",
-
-  model: {
-    prop: "code",
-    event: "input",
+  components: {
+    MonacoEditor,
   },
-
   props: {
     linter: {
-      type: Object,
+      type: Object as any as typeof Linter | null,
       default: null,
     },
     code: {
@@ -190,9 +118,6 @@ export default {
       default() {
         return {}
       },
-    },
-    dark: {
-      type: Boolean,
     },
     filename: {
       type: String,
@@ -211,111 +136,100 @@ export default {
     fix: {
       type: Boolean,
     },
-    format: {
-      type: Object,
-      default() {
-        return { insertSpaces: true, tabSize: 4 }
-      },
-    },
     language: {
       type: String,
       default: "javascript",
     },
   },
-  emits: ["input", "change"],
+  emits: ["input", "change", "update:code"],
 
   data() {
     return {
-      raw: shallowReactive({ monaco: null, editor: null }),
-      loadedMonaco: false,
-      monacoLoadingError: null,
-      loadLanguage: null,
-      editing: false,
-      messages: [],
+      editorValue: this.code,
+      editing: null as null | number,
+      messages: [] as Linter.LintMessage[],
       fixedCode: this.code,
-      fixedMessages: [],
+      fixedMessages: [] as Linter.LintMessage[],
       previewFix: false,
       requestFix: false,
-      editorMessageMap: new Map(),
-      codeActionProviderDisposable: null,
+      editorMessageMap: new Map<
+        TEditor.ITextModel["uri"],
+        Map<string, Linter.LintMessage>
+      >(),
     }
   },
 
   computed: {
-    codeEditor() {
-      const editor = this.raw.editor
-      if (editor != null) {
-        if (editor.getOriginalEditor != null) {
-          return editor.getOriginalEditor()
-        }
-        return editor
-      }
-      return null
-    },
-
-    fixedCodeEditor() {
-      const editor = this.raw.editor
-      if (editor != null && editor.getModifiedEditor != null) {
-        return editor.getModifiedEditor()
-      }
-      return null
-    },
-
-    /**
-     * @returns {import('monaco-editor').languages.CodeActionProvider}
-     */
-    codeActionProvider() {
-      return {
-        provideCodeActions: (model, _range, context) => {
-          const { editorMessageMap } = this
-          const messageMap = editorMessageMap.get(model.uri)
-          if (context.only !== "quickfix" || !messageMap) {
-            return {
-              actions: [],
-              dispose() {
-                /* nop */
-              },
-            }
-          }
-
-          const actions = []
-          for (const marker of context.markers) {
-            const message = messageMap.get(computeKey(marker))
-            if (!message) {
-              continue
-            }
-            if (message.fix) {
-              actions.push(
-                createQuickfixCodeAction(
-                  `Fix this ${message.ruleId} problem`,
-                  marker,
-                  model,
-                  message.fix,
-                ),
-              )
-            }
-            if (message.suggestions) {
-              for (const suggestion of message.suggestions) {
-                actions.push(
-                  createQuickfixCodeAction(
-                    `${suggestion.desc} (${message.ruleId})`,
-                    marker,
-                    model,
-                    suggestion.fix,
-                  ),
-                )
-              }
-            }
-          }
-
+    provideCodeActions(): ProvideCodeActions {
+      return (model, _range, context) => {
+        const { editorMessageMap } = this
+        const messageMap = editorMessageMap.get(model.uri)
+        if (context.only !== "quickfix" || !messageMap) {
           return {
-            actions,
+            actions: [],
             dispose() {
               /* nop */
             },
           }
-        },
+        }
+
+        const actions: MonacoEditorLanguages.CodeAction[] = []
+        for (const marker of context.markers) {
+          const message = messageMap.get(computeKey(marker))
+          if (!message) {
+            continue
+          }
+          if (message.fix) {
+            actions.push(
+              createQuickfixCodeAction(
+                `Fix this ${message.ruleId!} problem`,
+                marker,
+                model,
+                message.fix,
+              ),
+            )
+          }
+          if (message.suggestions) {
+            for (const suggestion of message.suggestions) {
+              actions.push(
+                createQuickfixCodeAction(
+                  `${suggestion.desc} (${message.ruleId!})`,
+                  marker,
+                  model,
+                  suggestion.fix,
+                ),
+              )
+            }
+          }
+        }
+
+        return {
+          actions,
+          dispose() {
+            /* nop */
+          },
+        }
       }
+    },
+    markers() {
+      const monacoEditor = this.$refs.monacoEditor as VIMonacoEditor | undefined
+      const editor = monacoEditor?.getLeftEditor()
+      return this.messagesToMarkers(
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call -- parser bug?
+        editor?.getModel() ?? null,
+        this.messages,
+        true,
+      )
+    },
+    rightMarkers() {
+      const monacoEditor = this.$refs.monacoEditor as VIMonacoEditor | undefined
+      const editor = monacoEditor?.getRightEditor()
+      return this.messagesToMarkers(
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call -- parser bug?
+        editor?.getModel() ?? null,
+        this.fixedMessages,
+        false,
+      )
     },
   },
 
@@ -323,234 +237,51 @@ export default {
     linter() {
       this.invalidate()
     },
-
     code(value) {
-      this.updateCode(value)
+      this.editorValue = value
     },
-
+    editorValue() {
+      this.initialize()
+    },
     previewFix() {
       this.initialize()
     },
-
     config: {
       handler() {
         this.invalidate()
       },
       deep: true,
     },
-
     filename() {
       this.invalidate()
     },
-
     fix() {
       this.initialize()
     },
-
-    fixedCode(value) {
-      const editor = this.fixedCodeEditor
-      if (editor != null) {
-        updateValue(editor, value)
-      }
-    },
-
-    fixedMessages(value) {
-      const editor = this.fixedCodeEditor
-      if (editor != null) {
-        this.updateMarkers(editor, value)
-      }
-    },
-
-    format(value) {
-      const editor = this.codeEditor
-      if (editor != null) {
-        editor.getModel().updateOptions(value)
-      }
-    },
-
-    messages(value) {
-      const editor = this.codeEditor
-      if (editor != null) {
-        this.updateMarkers(editor, value, true)
-      }
-    },
-
-    language(value) {
-      const { monaco, loadLanguage } = this
-      if (monaco == null) {
-        // Skip because the initialization logic does this.
-        return
-      }
-
-      ;(async () => {
-        // Load the language editor of the current language.
-        await loadLanguage(value)
-
-        // Skip if the language is not latest
-        if (value !== this.language) {
-          return
-        }
-
-        // Set the language to the current editors.
-        for (const editor of [this.codeEditor, this.fixedCodeEditor]) {
-          if (editor != null) {
-            monaco.editor.setModelLanguage(editor.getModel(), value)
-          }
-        }
-        dispose(this.codeActionProviderDisposable)
-        this.codeActionProviderDisposable =
-          this.raw.monaco.languages.registerCodeActionProvider(
-            this.language,
-            this.codeActionProvider,
-          )
-      })().catch((error) => {
-        console.error("Failed to set the language '%s':", value, error)
-      })
-    },
-  },
-
-  mounted() {
-    ;(async () => {
-      // Load the monaco editor lazily.
-      const { monaco, loadLanguage } = await import(
-        "vue-eslint-editor/dist/monaco.js"
-      )
-      // Load the language editor of the current language.
-      await loadLanguage(this.language)
-      // Finish loading.
-      this.raw.monaco = monaco
-      this.loadedMonaco = true
-      this.loadLanguage = loadLanguage
-      this.codeActionProviderDisposable =
-        monaco.languages.registerCodeActionProvider(
-          this.language,
-          this.codeActionProvider,
-        )
-    })().catch((error) => {
-      console.error("Failed to load Monaco editor:", error)
-      this.monacoLoadingError = error
-    })
-  },
-
-  beforeUnmount() {
-    dispose(this.raw.editor)
-    dispose(this.codeActionProviderDisposable)
-    this.$refs.monaco.innerHTML = ""
-    this.raw.editor = null
   },
 
   methods: {
-    async fadeIn(el) {
-      await this.$nextTick()
-      if (this.$refs.monaco && this.$refs.monaco.parentNode === el) {
-        this.initialize()
-      }
-    },
-
     initialize() {
-      if (this.raw.monaco != null) {
-        dispose(this.raw.editor)
-        this.$refs.monaco.innerHTML = ""
-        this.raw.editor = this.previewFix
-          ? this.createTwoPaneEditor()
-          : this.createEditor()
-        this.lint()
-      }
+      this.lint()
     },
 
-    createEditor() {
-      const {
-        code,
-        dark,
-        format,
-        language,
-        messages,
-        raw: { monaco },
-      } = this
-
-      // Create model.
-      const model = monaco.editor.createModel(code, language)
-      model.updateOptions(format)
-      model.onDidChangeContent(() => {
-        this.$emit("input", model.getValue())
-        this.invalidate()
-      })
-
-      // Create editor.
-      const editor = monaco.editor.create(this.$refs.monaco, {
-        model,
-        theme: dark ? "vs-dark" : "vs",
-        ...EDITOR_OPTS,
-      })
-      this.updateMarkers(editor, messages, true)
-
-      return editor
-    },
-
-    createTwoPaneEditor() {
-      const {
-        code,
-        dark,
-        fixedCode,
-        fixedMessages,
-        format,
-        language,
-        messages,
-        raw: { monaco },
-      } = this
-
-      // Somehow `createDiffEditor` doesn't have `model` option.
-      const editor = monaco.editor.createDiffEditor(this.$refs.monaco, {
-        originalEditable: true,
-        theme: dark ? "vs-dark" : "vs",
-        ...EDITOR_OPTS,
-      })
-      const original = monaco.editor.createModel(code, language)
-      const modified = monaco.editor.createModel(fixedCode, language)
-      const leftEditor = editor.getOriginalEditor()
-      const rightEditor = editor.getModifiedEditor()
-
-      rightEditor.updateOptions({ readOnly: true })
-      original.updateOptions(format)
-
-      // Set change event.
-      original.onDidChangeContent(() => {
-        const newCode = original.getValue()
-
-        this.fixedCode = newCode
-        this.$emit("input", newCode)
-        this.invalidate()
-      })
-
-      // Set model.
-      editor.setModel({ original, modified })
-
-      // Set markers.
-      this.updateMarkers(leftEditor, messages, true)
-      this.updateMarkers(rightEditor, fixedMessages)
-
-      return editor
-    },
-
-    messageToMarker(message) {
-      const {
-        raw: { monaco },
-        linter,
-      } = this
+    messageToMarker(message: Linter.LintMessage): TEditor.IMarkerData {
+      const { linter } = this
       const rule = message.ruleId && linter.getRules().get(message.ruleId)
-      const docUrl = rule && rule.meta && rule.meta.docs && rule.meta.docs.url
+      const docUrl =
+        rule && rule.meta && rule.meta.docs && (rule.meta.docs.url as any)
       const startLineNumber = ensurePositiveInt(message.line, 1)
       const startColumn = ensurePositiveInt(message.column, 1)
       const endLineNumber = ensurePositiveInt(message.endLine, startLineNumber)
       const endColumn = ensurePositiveInt(message.endColumn, startColumn + 1)
 
       const code = docUrl
-        ? { value: message.ruleId, link: docUrl }
+        ? { value: message.ruleId!, link: docUrl, target: docUrl }
         : message.ruleId || "FATAL"
 
       return {
         code,
-        severity: monaco.MarkerSeverity.Error,
+        severity: 8, // monaco.MarkerSeverity.Error,
         source: "ESLint",
         message: message.message,
         startLineNumber,
@@ -560,65 +291,48 @@ export default {
       }
     },
 
-    updateMarkers(editor, messages, storeMessageMap) {
-      const {
-        raw: { monaco },
-        editorMessageMap,
-      } = this
-      const model = editor.getModel()
-      const id = editor.getId()
+    messagesToMarkers(
+      model: TEditor.ITextModel | null,
+      messages: Linter.LintMessage[],
+      storeMessageMap: boolean,
+    ): TEditor.IMarkerData[] {
+      const { editorMessageMap } = this
 
-      editorMessageMap.delete(model.uri)
-      const markers = []
-      let messageMap = null
+      if (model) editorMessageMap.delete(model.uri)
+      const markers: TEditor.IMarkerData[] = []
+      let messageMap: Map<string, Linter.LintMessage> | null = null
       if (storeMessageMap) {
         messageMap = new Map()
-        editorMessageMap.set(model.uri, messageMap)
+        if (model) editorMessageMap.set(model.uri, messageMap)
       }
       for (const message of messages) {
         const marker = this.messageToMarker(message)
         markers.push(marker)
-        if (storeMessageMap) {
+        if (messageMap) {
           messageMap.set(computeKey(marker), message)
         }
       }
 
-      monaco.editor.setModelMarkers(model, id, markers)
-    },
-
-    updateCode(value) {
-      const editor = this.codeEditor
-      if (editor != null) {
-        updateValue(editor, value)
-      }
-      this.invalidate()
+      return markers
     },
 
     invalidate() {
-      if (this.raw.editor != null && !this.editing) {
-        this.editing = true
-        setTimeout(() => {
-          this.lint()
-          this.editing = false
-        }, 667)
+      if (this.editing != null) {
+        clearTimeout(this.editing)
       }
+      this.editing = setTimeout(() => {
+        this.lint()
+        this.editing = null
+      }, 667)
     },
 
     lint() {
-      const {
-        codeEditor: editor,
-        config,
-        filename,
-        preprocess,
-        postprocess,
-        linter,
-      } = this
-      if (editor == null || linter == null) {
+      const { config, filename, preprocess, postprocess, linter } = this
+      if (linter == null) {
         return
       }
       this.editorMessageMap.clear()
-      const model = editor.getModel()
-      const code = model.getValue()
+      const code = this.editorValue
 
       // Lint
       try {
@@ -626,13 +340,14 @@ export default {
           filename,
           preprocess,
           postprocess,
-        })
+        } as any as string)
       } catch (err) {
         this.messages = [
           {
             fatal: true,
+            ruleId: null,
             severity: 2,
-            message: err.message,
+            message: (err as Error).message,
             line: 1,
             column: 0,
           },
@@ -649,8 +364,9 @@ export default {
         this.fixedMessages = [
           {
             fatal: true,
+            ruleId: null,
             severity: 2,
-            message: err.message,
+            message: (err as Error).message,
             line: 1,
             column: 0,
           },
@@ -666,44 +382,27 @@ export default {
 
       if (this.requestFix) {
         this.requestFix = false
-        if (this.fixedCode !== this.code) {
-          this.$emit("input", this.fixedCode)
-          this.updateCode(this.fixedCode)
+        if (this.fixedCode !== this.editorValue) {
+          this.editorValue = this.fixedCode
+          this.$emit("update:code", this.fixedCode)
         }
       }
     },
 
     applyAutofix() {
-      const { code, fixedCode, editing } = this
+      const { editorValue, fixedCode, editing } = this
       if (editing) {
         this.requestFix = true
-      } else if (fixedCode !== code) {
-        this.$emit("input", fixedCode)
-        this.updateCode(fixedCode)
+      } else if (fixedCode !== editorValue) {
+        this.editorValue = this.fixedCode
+        this.$emit("update:code", fixedCode)
       }
     },
   },
-}
+})
 </script>
 
-<style>
-.eslint-editor-root {
-  position: relative;
-}
-
-.eslint-editor-swap-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.eslint-editor-monaco {
-  width: 100%;
-  height: 100%;
-}
-
+<style scoped>
 .eslint-editor-actions {
   display: flex;
   flex-direction: row;
@@ -729,12 +428,6 @@ export default {
 
 .eslint-editor-actions,
 .eslint-editor-actions button {
-  background-color: #ffffff;
-  color: #1e1e1e;
-}
-
-.eslint-editor-dark .eslint-editor-actions,
-.eslint-editor-dark .eslint-editor-actions button {
   background-color: #1e1e1e;
   color: #d4d4d4;
 }
@@ -753,105 +446,13 @@ export default {
   vertical-align: middle;
   cursor: pointer;
 }
-.eslint-editor-root .eslint-editor-actions > *:hover {
+.eslint-editor-actions > *:hover {
   background-color: rgba(128, 128, 128, 0.2);
 }
-.eslint-editor-root .eslint-editor-actions > *:active {
+.eslint-editor-actions > *:active {
   background-color: rgba(128, 128, 128, 0.4);
 }
 .eslint-editor-actions input[type="checkbox"] {
   display: none;
-}
-
-.eslint-editor-root .eslint-editor-placeholder-code {
-  display: block;
-  box-sizing: border-box;
-  height: 100%;
-  white-space: pre;
-  background-color: #ffffff;
-  color: #1e1e1e;
-}
-.eslint-editor-root.eslint-editor-dark .eslint-editor-placeholder-code {
-  background-color: #1e1e1e;
-  color: #d4d4d4;
-}
-
-.eslint-editor-placeholder-loading,
-.eslint-editor-placeholder-error {
-  position: absolute;
-  right: 8px;
-  bottom: 8px;
-  pointer-events: none;
-}
-
-.eslint-editor-placeholder-loading {
-  line-height: 1.5em;
-}
-
-.eslint-editor-placeholder-error {
-  color: #f44336;
-}
-
-.eslint-editor-placeholder-loading-icon {
-  display: inline-block;
-  position: relative;
-  width: 1.5em;
-  height: 1.5em;
-  margin-right: 4px;
-  vertical-align: middle;
-}
-.eslint-editor-placeholder-loading-icon > div {
-  position: absolute;
-  border-radius: 50%;
-  border-color: #3eaf7c;
-  border-width: 2px;
-  border-style: none solid none solid;
-  animation: ESLintEditorLoadingIcon 1s linear infinite;
-}
-.eslint-editor-placeholder-loading-icon > div:nth-child(1) {
-  height: 100%;
-  width: 100%;
-  animation-duration: 1.3s;
-}
-.eslint-editor-placeholder-loading-icon > div:nth-child(2) {
-  top: 1px;
-  left: 2px;
-  width: calc(100% - 4px);
-  height: calc(100% - 2px);
-  animation-duration: 0.7s;
-}
-.eslint-editor-placeholder-loading-icon > div:nth-child(3) {
-  top: 2px;
-  left: 4px;
-  width: calc(100% - 8px);
-  height: calc(100% - 4px);
-  animation-duration: 1s;
-}
-
-.eslint-editor-placeholder-loading-message {
-  display: inline-block;
-  color: gray;
-  vertical-align: middle;
-}
-
-@keyframes ESLintEditorLoadingIcon {
-  0% {
-    transform: rotateY(0deg);
-  }
-  50% {
-    transform: rotateY(210deg);
-  }
-  100% {
-    transform: rotateY(360deg);
-  }
-}
-
-.eslint-editor-fade-enter-active,
-.eslint-editor-fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-.eslint-editor-fade-enter,
-.eslint-editor-fade-leave-to {
-  opacity: 0;
 }
 </style>
