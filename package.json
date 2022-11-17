@@ -10,6 +10,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@ota-meshi/site-kit-monaco-editor-vue": "^0.1.0",
     "@typescript-eslint/parser": "~5.43.0",
     "assert": "^2.0.0",
     "eslint": "~8.27.0",
@@ -28,10 +29,10 @@
     "@types/eslint": "^8.0.0",
     "@types/pako": "^2.0.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0-0",
-    "@vue/cli-plugin-typescript": "^5.0.0",
-    "@vue/cli-service": "^5.0.0",
+    "@vue/cli-plugin-typescript": "^5.0.8",
+    "@vue/cli-service": "^5.0.8",
     "@vue/eslint-config-prettier": "^7.0.0",
-    "@vue/eslint-config-typescript": "^11.0.0",
+    "@vue/eslint-config-typescript": "^11.0.2",
     "eslint-plugin-eslint-comments": "^3.2.0",
     "eslint-plugin-json-schema-validator": "^4.0.0",
     "eslint-plugin-jsonc": "^2.0.0",
@@ -39,7 +40,9 @@
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-regexp": "^1.0.0",
     "eslint-plugin-yml": "^1.0.0",
+    "monaco-editor": "^0.34.1",
     "prettier": "^2.3.2",
-    "string-replace-loader": "^3.0.3"
+    "string-replace-loader": "^3.0.3",
+    "typescript-eslint-parser-for-extra-files": "^0.1.1"
   }
 }
