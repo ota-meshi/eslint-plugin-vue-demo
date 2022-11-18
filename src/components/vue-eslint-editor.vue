@@ -215,7 +215,6 @@ export default defineComponent({
       const monacoEditor = this.$refs.monacoEditor as VIMonacoEditor | undefined
       const editor = monacoEditor?.getLeftEditor()
       return this.messagesToMarkers(
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call -- parser bug?
         editor?.getModel() ?? null,
         this.messages,
         true,
@@ -225,7 +224,6 @@ export default defineComponent({
       const monacoEditor = this.$refs.monacoEditor as VIMonacoEditor | undefined
       const editor = monacoEditor?.getRightEditor()
       return this.messagesToMarkers(
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call -- parser bug?
         editor?.getModel() ?? null,
         this.fixedMessages,
         false,
