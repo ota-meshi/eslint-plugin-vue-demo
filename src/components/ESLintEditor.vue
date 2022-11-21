@@ -14,7 +14,7 @@
       tabSize: 2,
     }"
     fix
-    @input="onInput"
+    @update:code="onInput"
     @change="onChange"
   />
 </template>
@@ -28,7 +28,7 @@ import { parseForESLint } from "vue-eslint-parser"
 import { rules as vueRules, processors } from "eslint-plugin-vue"
 // @ts-expect-error -- ignore
 import { rules as a11yRules } from "eslint-plugin-vuejs-accessibility"
-import EslintEditor from "./vue-eslint-editor.vue"
+import EslintEditor from "@ota-meshi/site-kit-eslint-editor-vue"
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access -- ignore
 const vueProcessor: LinterType.Processor = processors[".vue"]
@@ -142,7 +142,7 @@ const resolvedLinter = computed(() => {
 
   return linter
 })
-const config = computed(() => {
+const config = computed<LinterType.Config>(() => {
   return {
     globals: {
       console: false,
