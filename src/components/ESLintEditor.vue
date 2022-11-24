@@ -48,35 +48,6 @@ for (const ruleId of Object.keys(a11yRules)) {
   linter.defineRule(`vuejs-accessibility/${ruleId}`, a11yRules[ruleId])
 }
 
-// eslint-disable-next-line @typescript-eslint/unbound-method -- ignore
-const verifyAndFix = linter.verifyAndFix
-
-linter.verifyAndFix = function (
-  code: string,
-  config: LinterType.Config,
-  option: LinterType.LintOptions,
-  ...args: []
-) {
-  /* eslint-disable no-invalid-this -- ignore */
-  return verifyAndFix.call(
-    // @ts-expect-error -- ignore
-    this,
-    code,
-    config,
-    {
-      /* eslint-disable @typescript-eslint/unbound-method -- ignore */
-      // @ts-expect-error -- ignore
-      preprocess: vueProcessor.preprocess,
-      // @ts-expect-error -- ignore
-      postprocess: vueProcessor.postprocess,
-      /* eslint-enable @typescript-eslint/unbound-method -- ignore */
-      ...option,
-    },
-    ...args,
-  )
-  /* eslint-enable no-invalid-this -- ignore */
-} as never
-
 const loadedParsers = reactive({
   parsers: { "@typescript-eslint/parser": false } as Record<
     string,
