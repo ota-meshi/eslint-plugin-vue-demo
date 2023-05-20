@@ -13,7 +13,7 @@
     "@ota-meshi/site-kit-eslint-editor-vue": "^0.1.0",
     "@typescript-eslint/parser": "~5.59.0",
     "assert": "^2.0.0",
-    "eslint": "~8.40.0",
+    "eslint": "~8.41.0",
     "eslint-plugin-vue": "~9.13.0",
     "eslint-plugin-vuejs-accessibility": "~2.1.0",
     "pako": "^2.0.3",
