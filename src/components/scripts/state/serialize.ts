@@ -8,12 +8,15 @@ import pako from "pako"
 function getEnabledRules(
   allRules: Record<string, "error" | "off">,
 ): Record<string, 2> {
-  return Object.keys(allRules).reduce((map, id) => {
-    if (allRules[id] === "error") {
-      map[id] = 2
-    }
-    return map
-  }, {} as Record<string, 2>)
+  return Object.keys(allRules).reduce(
+    (map, id) => {
+      if (allRules[id] === "error") {
+        map[id] = 2
+      }
+      return map
+    },
+    {} as Record<string, 2>,
+  )
 }
 
 /**
