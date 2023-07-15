@@ -58,6 +58,7 @@ module.exports = {
         "plugin:@typescript-eslint/recommended-requiring-type-checking",
       ],
       rules: {
+        "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/array-type": "error",
         "@typescript-eslint/explicit-module-boundary-types": [
           "error",
@@ -110,7 +111,7 @@ module.exports = {
         "@typescript-eslint/no-inferrable-types": "error",
         "@typescript-eslint/no-misused-new": "error",
         "@typescript-eslint/no-misused-promises": "error",
-        "@typescript-eslint/no-parameter-properties": "error",
+        "@typescript-eslint/parameter-properties": "error",
         "@typescript-eslint/no-require-imports": "off",
         "@typescript-eslint/no-this-alias": [
           "error",

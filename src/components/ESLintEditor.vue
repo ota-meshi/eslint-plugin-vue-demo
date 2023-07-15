@@ -49,10 +49,7 @@ for (const ruleId of Object.keys(a11yRules)) {
 }
 
 const loadedParsers = reactive({
-  parsers: { "@typescript-eslint/parser": false } as Record<
-    string,
-    boolean | any
-  >,
+  parsers: { "@typescript-eslint/parser": false } as Record<string, any>,
 })
 // @ts-expect-error -- use require-parser
 window.loadedParsers = loadedParsers

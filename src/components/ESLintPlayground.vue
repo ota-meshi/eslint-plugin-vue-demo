@@ -107,7 +107,7 @@ type Data = {
 }
 
 export default defineComponent<
-  {},
+  Record<string, never>,
   Data & {
     serializedString: string
     onUpdateMessages: (messages: any[]) => void
