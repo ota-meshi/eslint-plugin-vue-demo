@@ -26,6 +26,9 @@ module.exports = {
           module: path.resolve("./shim/module.js"),
           globby: path.resolve("./shim/empty"),
           eslint$: path.resolve("./shim/eslint/index.js"),
+          "eslint/use-at-your-own-risk": path.resolve(
+            "./shim/eslint//use-at-your-own-risk.js",
+          ),
           esquery: path.resolve("./node_modules/esquery/dist/esquery.min.js"),
           "@eslint/eslintrc/universal": path.resolve(
             "./node_modules/@eslint/eslintrc/dist/eslintrc-universal.cjs",
