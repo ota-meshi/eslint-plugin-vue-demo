@@ -14,7 +14,7 @@
     "@stylistic/eslint-plugin": "~1.4.1",
     "@typescript-eslint/parser": "~6.13.0",
     "assert": "^2.0.0",
-    "eslint": "~8.54.0",
+    "eslint": "~8.55.0",
     "eslint-plugin-vue": "~9.19.0",
     "eslint-plugin-vuejs-accessibility": "~2.2.0",
     "pako": "^2.0.3",
