@@ -12,7 +12,7 @@
   "dependencies": {
     "@ota-meshi/site-kit-eslint-editor-vue": "^0.1.0",
     "@stylistic/eslint-plugin": "~1.6.0",
-    "@typescript-eslint/parser": "~7.1.0",
+    "@typescript-eslint/parser": "~7.2.0",
     "assert": "^2.0.0",
     "eslint": "~8.57.0",
     "eslint-plugin-vue": "~9.22.0",
