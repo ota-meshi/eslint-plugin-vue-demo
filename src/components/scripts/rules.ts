@@ -1,7 +1,6 @@
 import { Linter } from "eslint"
 // @ts-expect-error -- ignore
 import { rules as vueRules } from "eslint-plugin-vue"
-// @ts-expect-error -- ignore
 import { rules as a11yRules } from "eslint-plugin-vuejs-accessibility"
 
 const linter = new Linter()
@@ -154,8 +153,7 @@ export const categories: Category[] = [
 ]
 export const DEFAULT_RULES_CONFIG: Record<string, "error"> = {}
 
-for (const baseRuleId of Object.keys(vueRules)) {
-  const rule = vueRules[baseRuleId]
+for (const [baseRuleId, rule] of Object.entries(vueRules) as [string, any][]) {
   if (rule.meta.deprecated) {
     continue
   }
@@ -178,16 +176,15 @@ for (const baseRuleId of Object.keys(vueRules)) {
     DEFAULT_RULES_CONFIG[ruleId] = "error"
   }
 }
-for (const baseRuleId of Object.keys(a11yRules)) {
-  const rule = a11yRules[baseRuleId]
-  if (rule.meta.deprecated) {
+for (const [baseRuleId, rule] of Object.entries(a11yRules)) {
+  if (rule.meta!.deprecated) {
     continue
   }
   const ruleId = `vuejs-accessibility/${baseRuleId}`
   const data: Rule = {
     ruleId,
     rule,
-    url: rule.meta.docs.url || "",
+    url: rule.meta!.docs!.url || "",
     classes: "eslint-plugin-vuejs-accessibility-rule",
   }
   categories
@@ -231,7 +228,7 @@ export function getRule(ruleId: string | null): Rule | null {
     rule = vueRules[ruleId.slice(4)]
     classes = "eslint-plugin-vue-rule"
   } else if (ruleId.startsWith("vuejs-accessibility/")) {
-    rule = a11yRules[ruleId.slice(20)]
+    rule = a11yRules[ruleId.slice(20) as keyof typeof a11yRules]
     classes = "eslint-plugin-vuejs-accessibility-rule"
   } else {
     rule = linter.getRules().get(ruleId)
