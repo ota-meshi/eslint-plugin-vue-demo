@@ -146,12 +146,17 @@ module.exports = {
         "require-await": "off",
         "@typescript-eslint/require-await": "error",
         "no-use-before-define": "off",
+        // eslint-disable-next-line json-schema-validator/no-invalid -- schema bug?
         "@typescript-eslint/no-use-before-define": [
           "error",
           {
+            // eslint-disable-next-line json-schema-validator/no-invalid -- schema bug?
             functions: false,
+            // eslint-disable-next-line json-schema-validator/no-invalid -- schema bug?
             classes: true,
+            // eslint-disable-next-line json-schema-validator/no-invalid -- schema bug?
             variables: true,
+            // eslint-disable-next-line json-schema-validator/no-invalid -- schema bug?
             ignoreTypeReferences: true,
           },
         ],
