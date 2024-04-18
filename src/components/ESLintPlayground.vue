@@ -41,7 +41,7 @@
 import { defineComponent } from "vue"
 import ESLintEditor from "./ESLintEditor.vue"
 import RulesSettings from "./RulesSettings.vue"
-import { deserializeState, serializeState } from "./scripts/state"
+import { deserializeState, serializeState } from "./scripts/state/index"
 import { DEFAULT_RULES_CONFIG, getRule } from "./scripts/rules"
 
 const DEFAULT_CODE =
