@@ -9,9 +9,6 @@ import { rules as vueRules, processors } from "eslint-plugin-vue"
 import { rules as a11yRules } from "eslint-plugin-vuejs-accessibility"
 import EslintEditor from "@ota-meshi/site-kit-eslint-editor-vue"
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access -- ignore
-const vueProcessor: LinterType.Processor = processors[".vue"]
-
 const linter = new Linter({ configType: "flat" })
 
 const loadedParsers = reactive({
@@ -23,6 +20,7 @@ window.loadedParsers = loadedParsers
 const plugins = {
   vue: {
     rules: vueRules,
+    processors,
   },
   "vuejs-accessibility": {
     rules: a11yRules,
@@ -90,6 +88,7 @@ const config = computed<LinterType.FlatConfig[]>(
     return [
       {
         files: ["**"],
+        processor: "vue/vue",
         plugins: plugins as any,
         languageOptions: {
           globals: {
@@ -168,8 +167,6 @@ function onChange(data: { messages: any[] }) {
     class="eslint-code-block"
     filename="ExampleComponent.vue"
     language="html"
-    :preprocess="vueProcessor.preprocess"
-    :postprocess="vueProcessor.postprocess"
     dark
     :format="{
       insertSpaces: true,
