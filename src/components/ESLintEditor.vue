@@ -1,29 +1,9 @@
-<template>
-  <EslintEditor
-    :linter="resolvedLinter"
-    :config="config"
-    :code="modelValue"
-    class="eslint-code-block"
-    filename="ExampleComponent.vue"
-    language="html"
-    :preprocess="vueProcessor.preprocess"
-    :postprocess="vueProcessor.postprocess"
-    dark
-    :format="{
-      insertSpaces: true,
-      tabSize: 2,
-    }"
-    fix
-    @update:code="onInput"
-    @change="onChange"
-  />
-</template>
-
 <script lang="ts">
 import { computed, reactive } from "vue"
 import { Linter } from "eslint"
-import type { Linter as LinterType, Rule } from "eslint"
-import { parseForESLint } from "vue-eslint-parser"
+import type { Linter as LinterType } from "eslint"
+import * as vueParser from "vue-eslint-parser"
+import globals from "globals"
 // @ts-expect-error -- ignore
 import { rules as vueRules, processors } from "eslint-plugin-vue"
 import { rules as a11yRules } from "eslint-plugin-vuejs-accessibility"
@@ -32,23 +12,22 @@ import EslintEditor from "@ota-meshi/site-kit-eslint-editor-vue"
 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access -- ignore
 const vueProcessor: LinterType.Processor = processors[".vue"]
 
-const linter = new Linter()
-linter.defineParser("vue-eslint-parser", {
-  parseForESLint: parseForESLint as never,
-})
-// eslint-disable-next-line @typescript-eslint/no-unsafe-argument -- ignore
-for (const [ruleId, rule] of Object.entries(vueRules)) {
-  linter.defineRule(`vue/${ruleId}`, rule as Rule.RuleModule)
-}
-for (const [ruleId, rule] of Object.entries(a11yRules)) {
-  linter.defineRule(`vuejs-accessibility/${ruleId}`, rule)
-}
+const linter = new Linter({ configType: "flat" })
 
 const loadedParsers = reactive({
   parsers: { "@typescript-eslint/parser": false } as Record<string, any>,
 })
 // @ts-expect-error -- use require-parser
 window.loadedParsers = loadedParsers
+
+const plugins = {
+  vue: {
+    rules: vueRules,
+  },
+  "vuejs-accessibility": {
+    rules: a11yRules,
+  },
+}
 
 export default {}
 </script>
@@ -106,47 +85,54 @@ const resolvedLinter = computed(() => {
 
   return linter
 })
-const config = computed<LinterType.Config>(() => {
-  return {
-    globals: {
-      console: false,
-      // ES2015 globals
-      ArrayBuffer: false,
-      DataView: false,
-      Float32Array: false,
-      Float64Array: false,
-      Int16Array: false,
-      Int32Array: false,
-      Int8Array: false,
-      Map: false,
-      Promise: false,
-      Proxy: false,
-      Reflect: false,
-      Set: false,
-      Symbol: false,
-      Uint16Array: false,
-      Uint32Array: false,
-      Uint8Array: false,
-      Uint8ClampedArray: false,
-      WeakMap: false,
-      WeakSet: false,
-      // ES2017 globals
-      Atomics: false,
-      SharedArrayBuffer: false,
-    },
-    parser: "vue-eslint-parser",
-    parserOptions: {
-      ecmaVersion: 2020,
-      sourceType: "module",
-      parser: resolvedParser.value,
-    },
-    rules: props.rules,
-    env: {
-      browser: true,
-      es2021: true,
-    },
-  }
-})
+const config = computed<LinterType.FlatConfig[]>(
+  (): LinterType.FlatConfig[] => {
+    return [
+      {
+        files: ["**"],
+        plugins: plugins as any,
+        languageOptions: {
+          globals: {
+            ...globals.builtin,
+            ...globals.browser,
+            ...globals.es2021,
+            console: false,
+            // ES2015 globals
+            ArrayBuffer: false,
+            DataView: false,
+            Float32Array: false,
+            Float64Array: false,
+            Int16Array: false,
+            Int32Array: false,
+            Int8Array: false,
+            Map: false,
+            Promise: false,
+            Proxy: false,
+            Reflect: false,
+            Set: false,
+            Symbol: false,
+            Uint16Array: false,
+            Uint32Array: false,
+            Uint8Array: false,
+            Uint8ClampedArray: false,
+            WeakMap: false,
+            WeakSet: false,
+            // ES2017 globals
+            Atomics: false,
+            SharedArrayBuffer: false,
+          },
+          parser: vueParser,
+          parserOptions: {
+            ecmaVersion: "latest",
+            sourceType: "module",
+            parser: resolvedParser.value,
+          },
+        },
+        rules: props.rules,
+      },
+    ]
+  },
+)
 
 /**
  * Load parser
@@ -173,5 +159,26 @@ function onChange(data: { messages: any[] }) {
   emits("update-messages", data.messages)
 }
 </script>
+
+<template>
+  <EslintEditor
+    :linter="resolvedLinter"
+    :config="config as any"
+    :code="modelValue"
+    class="eslint-code-block"
+    filename="ExampleComponent.vue"
+    language="html"
+    :preprocess="vueProcessor.preprocess"
+    :postprocess="vueProcessor.postprocess"
+    dark
+    :format="{
+      insertSpaces: true,
+      tabSize: 2,
+    }"
+    fix
+    @update:code="onInput"
+    @change="onChange"
+  />
+</template>
 
 <style></style>
