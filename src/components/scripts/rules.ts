@@ -153,7 +153,8 @@ export const categories: Category[] = [
 ]
 export const DEFAULT_RULES_CONFIG: Record<string, "error"> = {}
 
-for (const [baseRuleId, rule] of Object.entries(vueRules) as [string, any][]) {
+for (const [baseRuleId, unknownRule] of Object.entries(vueRules)) {
+  const rule = unknownRule as any
   if (rule.meta.deprecated) {
     continue
   }
