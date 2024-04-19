@@ -40,6 +40,7 @@ module.exports = {
           fs: false,
         },
       },
+      externals: { "node:os": "{}" },
       module: {
         rules: [
           {
