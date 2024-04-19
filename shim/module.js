@@ -1,3 +1,4 @@
+const requireParser = require("./require-parser")
 module.exports = {
-  createRequire: () => () => null,
+  createRequire: () => requireParser,
 }

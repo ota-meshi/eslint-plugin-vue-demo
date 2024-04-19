@@ -1,10 +1,9 @@
-import { Linter } from "eslint"
+import { builtinRules } from "eslint/use-at-your-own-risk"
 // @ts-expect-error -- ignore
 import { rules as vueRules } from "eslint-plugin-vue"
 import { rules as a11yRules } from "eslint-plugin-vuejs-accessibility"
 
-const linter = new Linter()
-const coreRules = new Set(linter.getRules().values())
+const coreRules = new Set(builtinRules.values())
 
 export type Rule = {
   ruleId: string
@@ -196,7 +195,7 @@ for (const [baseRuleId, rule] of Object.entries(a11yRules)) {
     )
     ?.rules.push(data)
 }
-for (const [ruleId, rule] of linter.getRules()) {
+for (const [ruleId, rule] of builtinRules) {
   if (rule.meta?.deprecated) {
     continue
   }
@@ -232,7 +231,7 @@ export function getRule(ruleId: string | null): Rule | null {
     rule = a11yRules[ruleId.slice(20) as keyof typeof a11yRules]
     classes = "eslint-plugin-vuejs-accessibility-rule"
   } else {
-    rule = linter.getRules().get(ruleId)
+    rule = builtinRules.get(ruleId)
     classes = "eslint-rule"
   }
   return rule

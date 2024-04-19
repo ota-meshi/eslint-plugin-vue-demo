@@ -1,3 +1,4 @@
 /* eslint n/no-unsupported-features/es-syntax:0 -- ignore */
-export const builtinRules = new Map()
+import rules from "../../node_modules/eslint/lib/rules/index.js"
+export const builtinRules = rules
 export default { builtinRules }
