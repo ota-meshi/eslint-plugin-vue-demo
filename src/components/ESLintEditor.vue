@@ -22,11 +22,10 @@
 <script lang="ts">
 import { computed, reactive } from "vue"
 import { Linter } from "eslint"
-import type { Linter as LinterType } from "eslint"
+import type { Linter as LinterType, Rule } from "eslint"
 import { parseForESLint } from "vue-eslint-parser"
 // @ts-expect-error -- ignore
 import { rules as vueRules, processors } from "eslint-plugin-vue"
-// @ts-expect-error -- ignore
 import { rules as a11yRules } from "eslint-plugin-vuejs-accessibility"
 import EslintEditor from "@ota-meshi/site-kit-eslint-editor-vue"
 
@@ -38,14 +37,11 @@ linter.defineParser("vue-eslint-parser", {
   parseForESLint: parseForESLint as never,
 })
 // eslint-disable-next-line @typescript-eslint/no-unsafe-argument -- ignore
-for (const ruleId of Object.keys(vueRules)) {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument -- ignore
-  linter.defineRule(`vue/${ruleId}`, vueRules[ruleId])
+for (const [ruleId, rule] of Object.entries(vueRules)) {
+  linter.defineRule(`vue/${ruleId}`, rule as Rule.RuleModule)
 }
-// eslint-disable-next-line @typescript-eslint/no-unsafe-argument -- ignore
-for (const ruleId of Object.keys(a11yRules)) {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument -- ignore
-  linter.defineRule(`vuejs-accessibility/${ruleId}`, a11yRules[ruleId])
+for (const [ruleId, rule] of Object.entries(a11yRules)) {
+  linter.defineRule(`vuejs-accessibility/${ruleId}`, rule)
 }
 
 const loadedParsers = reactive({
