@@ -45,6 +45,6 @@
     "monaco-editor": "^0.49.0",
     "prettier": "^3.0.0",
     "string-replace-loader": "^3.0.3",
-    "typescript-eslint-parser-for-extra-files": "^0.6.0"
+    "typescript-eslint-parser-for-extra-files": "^0.7.0"
   }
 }
