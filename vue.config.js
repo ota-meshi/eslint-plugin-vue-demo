@@ -1,3 +1,5 @@
+// eslint-disable-next-line n/no-extraneous-require -- OK
+const webpack = require("webpack")
 const path = require("path")
 process.env.VUE_APP_BUILD_AT = new Date().toLocaleString(undefined, {
   timeZoneName: "short",
@@ -38,9 +40,27 @@ module.exports = {
           assert: require.resolve("assert/"),
           path: require.resolve("path-browserify"),
           fs: false,
+          "node:fs": false,
         },
       },
       externals: { "node:os": "{}" },
+      plugins: [
+        new webpack.NormalModuleReplacementPlugin(/node:/, (resource) => {
+          const mod = resource.request.replace(/^node:/, "")
+          switch (mod) {
+            case "assert":
+              resource.request = "assert"
+              return
+            case "path":
+              resource.request = "path-browserify"
+              return
+            case "os":
+              return
+            default:
+              throw new Error(`Not found ${mod}`)
+          }
+        }),
+      ],
       module: {
         rules: [
           {
