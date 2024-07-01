@@ -14,10 +14,10 @@
     "@stylistic/eslint-plugin": "~2.2.0",
     "@typescript-eslint/parser": "~7.13.0",
     "assert": "^2.0.0",
-    "eslint": "~8.57.0",
+    "eslint": "~9.6.0",
     "eslint-plugin-vue": "~9.26.0",
     "eslint-plugin-vuejs-accessibility": "~2.3.0",
-    "globals": "^15.0.0",
+    "globals": "^15.7.0",
     "pako": "^2.0.3",
     "path-browserify": "^1.0.1",
     "tslib": "^2.3.0",
@@ -26,10 +26,11 @@
     "vue-eslint-parser": "~9.4.0"
   },
   "devDependencies": {
-    "@ota-meshi/eslint-plugin": "^0.17.0",
+    "@eslint/eslintrc": "^3.1.0",
+    "@eslint/js": "^9.6.0",
+    "@ota-meshi/eslint-plugin": "^0.17.5",
     "@types/eslint": "^8.0.0",
     "@types/pako": "^2.0.0",
-    "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@vue/cli-plugin-typescript": "^5.0.8",
     "@vue/cli-service": "^5.0.8",
     "@vue/eslint-config-prettier": "^9.0.0",
@@ -45,6 +46,7 @@
     "monaco-editor": "^0.50.0",
     "prettier": "^3.0.0",
     "string-replace-loader": "^3.0.3",
+    "typescript-eslint": "^7.14.1",
     "typescript-eslint-parser-for-extra-files": "^0.7.0"
   }
 }
