@@ -106,15 +106,7 @@ type Data = {
   messages: any[]
 }
 
-export default defineComponent<
-  Record<string, never>,
-  Data & {
-    serializedString: string
-    onUpdateMessages: (messages: any[]) => void
-    onUrlHashChange: () => void
-    getRule: typeof getRule
-  }
->({
+export default defineComponent({
   name: "ESLintPlayground",
   components: {
     ESLintEditor,

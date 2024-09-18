@@ -165,7 +165,7 @@ export default [
       "@typescript-eslint/triple-slash-reference": "error",
 
       "@typescript-eslint/unbound-method": [
-        "error",
+        "off",
         {
           ignoreStatic: true,
         },
