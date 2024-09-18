@@ -40,6 +40,7 @@ export default [
           usePrettierrc: true,
         },
       ],
+      "default-case": "off",
     },
   },
   {

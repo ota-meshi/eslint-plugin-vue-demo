@@ -27,6 +27,7 @@ module.exports = {
         alias: {
           module: path.resolve("./shim/module.js"),
           globby: path.resolve("./shim/empty"),
+          "fast-glob": path.resolve("./shim/empty"),
           eslint$: path.resolve("./shim/eslint/index.js"),
           "eslint/use-at-your-own-risk": path.resolve(
             "./shim/eslint//use-at-your-own-risk.js",
@@ -40,24 +41,18 @@ module.exports = {
           assert: require.resolve("assert/"),
           path: require.resolve("path-browserify"),
           fs: false,
-          "node:fs": false,
         },
       },
-      externals: { "node:os": "{}" },
+      externals: { "node:os": "{}", "node:fs": "{}", "node:util": "{}" },
       plugins: [
         new webpack.NormalModuleReplacementPlugin(/node:/, (resource) => {
           const mod = resource.request.replace(/^node:/, "")
-          switch (mod) {
-            case "assert":
-              resource.request = "assert"
-              return
-            case "path":
-              resource.request = "path-browserify"
-              return
-            case "os":
-              return
-            default:
-              throw new Error(`Not found ${mod}`)
+          if (mod === "assert") {
+            resource.request = "assert"
+          } else if (mod === "path") {
+            resource.request = "path-browserify"
+          } else {
+            // throw new Error(`Not found ${mod}`)
           }
         }),
       ],
