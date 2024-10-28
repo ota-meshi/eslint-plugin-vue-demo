@@ -4,7 +4,6 @@ import { Linter } from "eslint"
 import type { Linter as LinterType } from "eslint"
 import * as vueParser from "vue-eslint-parser"
 import globals from "globals"
-// @ts-expect-error -- ignore
 import { rules as vueRules, processors } from "eslint-plugin-vue"
 import { rules as a11yRules } from "eslint-plugin-vuejs-accessibility"
 import EslintEditor from "@ota-meshi/site-kit-eslint-editor-vue"
