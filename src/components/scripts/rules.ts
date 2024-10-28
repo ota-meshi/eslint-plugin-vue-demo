@@ -1,5 +1,4 @@
 import { builtinRules } from "eslint/use-at-your-own-risk"
-// @ts-expect-error -- ignore
 import { rules as vueRules } from "eslint-plugin-vue"
 import { rules as a11yRules } from "eslint-plugin-vuejs-accessibility"
 
@@ -153,7 +152,7 @@ export const categories: Category[] = [
 export const DEFAULT_RULES_CONFIG: Record<string, "error"> = {}
 
 for (const [baseRuleId, unknownRule] of Object.entries(vueRules)) {
-  const rule = unknownRule as any
+  const rule = unknownRule
   if (rule.meta.deprecated) {
     continue
   }
