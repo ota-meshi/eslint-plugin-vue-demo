@@ -14,7 +14,7 @@
     "@stylistic/eslint-plugin": "~3.0.0",
     "@typescript-eslint/parser": "~8.23.0",
     "assert": "^2.0.0",
-    "eslint": "~9.19.0",
+    "eslint": "~9.20.0",
     "eslint-plugin-vue": "~9.32.0",
     "eslint-plugin-vuejs-accessibility": "~2.4.0",
     "globals": "^15.7.0",
