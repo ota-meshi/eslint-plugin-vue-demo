@@ -4,9 +4,9 @@ module.exports = function (nm) {
     // eslint-disable-next-line n/no-extraneous-require -- ignore
     return require("espree")
   }
-  if (typeof loadedParsers !== "undefined") {
+  if (typeof loadedParsers !== "undefined" && loadedParsers.parsers[nm]) {
     return loadedParsers.parsers[nm]
   }
-  // eslint-disable-next-line n/no-extraneous-require -- ignore
-  return require("espree")
+
+  throw new Error(`Parser "${nm}" not loaded`)
 }
