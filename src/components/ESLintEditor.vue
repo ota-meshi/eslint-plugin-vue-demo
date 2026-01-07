@@ -137,9 +137,8 @@ const config = computed<LinterType.FlatConfig[]>(
  */
 async function loadParser(parser: string) {
   if (parser === "@typescript-eslint/parser") {
-    loadedParsers.parsers["@typescript-eslint/parser"] = await import(
-      "@typescript-eslint/parser"
-    )
+    loadedParsers.parsers["@typescript-eslint/parser"] =
+      await import("@typescript-eslint/parser")
   }
 }
 
