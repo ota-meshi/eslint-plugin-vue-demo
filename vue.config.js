@@ -28,6 +28,7 @@ module.exports = {
           module: path.resolve("./shim/module.js"),
           globby: path.resolve("./shim/empty"),
           "fast-glob": path.resolve("./shim/empty"),
+          tinyglobby: path.resolve("./shim/empty"),
           eslint$: path.resolve("./shim/eslint/index.js"),
           "eslint/use-at-your-own-risk": path.resolve(
             "./shim/eslint//use-at-your-own-risk.js",

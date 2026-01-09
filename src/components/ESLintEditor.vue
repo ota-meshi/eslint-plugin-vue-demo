@@ -124,6 +124,9 @@ const config = computed<LinterType.FlatConfig[]>(
             ecmaVersion: "latest",
             sourceType: "module",
             parser: resolvedParser.value,
+            project: undefined,
+            projectService: undefined,
+            tsconfigRootDir: "/",
           },
         },
         rules: props.rules,
@@ -166,10 +169,7 @@ function onChange(data: { messages: any[] }) {
     filename="ExampleComponent.vue"
     language="html"
     dark
-    :format="{
-      insertSpaces: true,
-      tabSize: 2,
-    }"
+    :format="{ insertSpaces: true, tabSize: 2 }"
     fix
     @update:code="onInput"
     @change="onChange"
