@@ -51,18 +51,28 @@ const emits = defineEmits({
   "update-messages": (messages: any[]) => true,
 })
 
-const resolvedParser = computed(() =>
-  !props.parser || props.parser === "espree" ? undefined : props.parser,
-)
+const resolvedParser = computed(() => {
+  if (!props.parser || props.parser === "espree") {
+    return undefined
+  }
+  if (typeof props.parser === "string") {
+    return loadedParsers.parsers[props.parser]
+  }
+  const result: Record<string, any> = {}
+  for (const [key, value] of Object.entries(props.parser)) {
+    result[key] = loadedParsers.parsers[key]
+  }
+  return result
+})
+
 const parserList = computed((): string[] => {
-  const parser = resolvedParser.value
-  if (!parser) {
+  if (!props.parser || props.parser === "espree") {
     return []
   }
-  if (typeof parser === "string") {
-    return [parser]
+  if (typeof props.parser === "string") {
+    return [props.parser]
   }
-  return Object.values(parser) as string[]
+  return Object.values(props.parser)
 })
 
 const resolvedLinter = computed(() => {

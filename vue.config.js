@@ -44,7 +44,12 @@ module.exports = {
           fs: false,
         },
       },
-      externals: { "node:os": "{}", "node:fs": "{}", "node:util": "{}" },
+      externals: {
+        "node:os": "{}",
+        "node:fs": "{}",
+        "node:util": "{}",
+        "node:module": "{}",
+      },
       plugins: [
         new webpack.NormalModuleReplacementPlugin(/node:/, (resource) => {
           const mod = resource.request.replace(/^node:/, "")
