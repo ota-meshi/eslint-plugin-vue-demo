@@ -98,7 +98,7 @@ const config = computed<LinterType.FlatConfig[]>(
       {
         files: ["**"],
         processor: "vue/vue",
-        plugins: plugins as any,
+        plugins,
         languageOptions: {
           globals: {
             ...globals.builtin,
