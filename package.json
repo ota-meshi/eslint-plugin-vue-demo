@@ -30,7 +30,7 @@
     "@eslint/js": "^10.0.0",
     "@ota-meshi/eslint-plugin": "^0.20.0",
     "@types/eslint": "^9.0.0",
-    "@types/pako": "^2.0.0",
+    "@types/pako": "^3.0.0",
     "@vue/cli-plugin-typescript": "^5.0.8",
     "@vue/cli-service": "^5.0.8",
     "@vue/eslint-config-prettier": "^10.0.0",
