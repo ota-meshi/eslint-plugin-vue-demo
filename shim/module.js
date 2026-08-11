@@ -1,4 +1,9 @@
-const requireParser = require("./require-parser")
-module.exports = {
-  createRequire: () => requireParser,
+import requireParser from "./require-parser.js"
+
+/**
+ * Shim for `module.createRequire`.
+ */
+export function createRequire() {
+  return requireParser
 }
+export default { createRequire }

@@ -2,9 +2,11 @@
   "name": "eslint-plugin-vue-demo",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "serve": "vite",
+    "build": "vue-tsc --noEmit && NODE_OPTIONS=--max-old-space-size=8192 vite build",
+    "preview": "vite preview",
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
     "format": "prettier --write ."
@@ -17,10 +19,10 @@
     "eslint": "~10.8.0",
     "eslint-plugin-vue": "~10.10.0",
     "eslint-plugin-vuejs-accessibility": "~2.6.0",
+    "events": "^3.3.0",
     "globals": "^17.0.0",
     "pako": "^3.0.0",
     "path-browserify": "^1.0.1",
-    "tslib": "^2.3.0",
     "typescript": "~6.0.0",
     "vue": "^3.4.23",
     "vue-eslint-parser": "~10.4.0"
@@ -29,12 +31,10 @@
     "@eslint/eslintrc": "^3.1.0",
     "@eslint/js": "^10.0.0",
     "@ota-meshi/eslint-plugin": "^0.20.0",
-    "@types/eslint": "^9.0.0",
+    "@types/node": "^24.0.0",
     "@types/pako": "^3.0.0",
-    "@vue/cli-plugin-typescript": "^5.0.8",
-    "@vue/cli-service": "^5.0.8",
-    "@vue/eslint-config-prettier": "^10.0.0",
-    "@vue/eslint-config-typescript": "^14.0.0",
+    "@vitejs/plugin-vue": "^6.0.8",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-eslint-comments": "^3.2.0",
     "eslint-plugin-jsdoc": "^64.0.0",
     "eslint-plugin-json-schema-validator": "^6.0.0",
@@ -45,8 +45,9 @@
     "eslint-plugin-yml": "^3.0.0",
     "monaco-editor": "^0.56.0",
     "prettier": "^3.0.0",
-    "string-replace-loader": "^3.0.3",
     "typescript-eslint": "^8.0.0",
-    "typescript-eslint-parser-for-extra-files": "^0.9.0"
+    "typescript-eslint-parser-for-extra-files": "^0.9.0",
+    "vite": "^7.3.6",
+    "vue-tsc": "^3.3.9"
   }
 }

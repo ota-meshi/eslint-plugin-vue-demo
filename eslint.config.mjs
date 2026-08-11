@@ -22,6 +22,7 @@ export default [
       globals: {
         ...globals.node,
         process: "readonly",
+        __BUILD_AT__: "readonly",
       },
       sourceType: "module",
     },

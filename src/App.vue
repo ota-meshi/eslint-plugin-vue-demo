@@ -37,30 +37,24 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue"
+<script setup lang="ts">
 import ESLintPlayground from "./components/ESLintPlayground.vue"
+import eslintPluginVuePackageJson from "eslint-plugin-vue/package.json"
+import vueEslintParserPackageJson from "vue-eslint-parser/package.json"
+import eslintPackageJson from "eslint/package.json"
+import typescriptEslintParserPackageJson from "@typescript-eslint/parser/package.json"
+import typescriptPackageJson from "typescript/package.json"
+import a11yPackageJson from "eslint-plugin-vuejs-accessibility/package.json"
 
-export default defineComponent({
-  name: "App",
-  components: {
-    ESLintPlayground,
-  },
-  data() {
-    return {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access -- env
-      buildAt: process.env.VUE_APP_BUILD_AT,
-      packages: [
-        require("eslint-plugin-vue/package.json"),
-        require("vue-eslint-parser/package.json"),
-        require("eslint/package.json"),
-        require("@typescript-eslint/parser/package.json"),
-        require("typescript/package.json"),
-        require("eslint-plugin-vuejs-accessibility/package.json"),
-      ],
-    }
-  },
-})
+const buildAt = __BUILD_AT__
+const packages = [
+  eslintPluginVuePackageJson,
+  vueEslintParserPackageJson,
+  eslintPackageJson,
+  typescriptEslintParserPackageJson,
+  typescriptPackageJson,
+  a11yPackageJson,
+]
 </script>
 
 <style scoped>

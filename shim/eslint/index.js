@@ -1,4 +1,5 @@
-/* eslint n/no-unsupported-features/es-syntax:0 -- ignore */
 import { Linter } from "../../node_modules/eslint/lib/linter/index.js"
-export { Linter }
-export default { Linter }
+import { SourceCode } from "../../node_modules/eslint/lib/languages/js/source-code/index.js"
+
+export { Linter, SourceCode }
+export default { Linter, SourceCode }

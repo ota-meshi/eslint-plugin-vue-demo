@@ -59,8 +59,8 @@ const resolvedParser = computed(() => {
     return loadedParsers.parsers[props.parser]
   }
   const result: Record<string, any> = {}
-  for (const [key, value] of Object.entries(props.parser)) {
-    result[key] = loadedParsers.parsers[key]
+  for (const [key, value] of Object.entries<string>(props.parser)) {
+    result[key] = loadedParsers.parsers[value]
   }
   return result
 })
