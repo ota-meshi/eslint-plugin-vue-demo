@@ -1,5 +1,5 @@
 <script lang="ts">
-import { computed, reactive } from "vue"
+import { computed, markRaw, reactive } from "vue"
 import { Linter } from "eslint"
 import type { Linter as LinterType } from "eslint"
 import * as vueParser from "vue-eslint-parser"
@@ -150,8 +150,11 @@ const config = computed<LinterType.FlatConfig[]>(
  */
 async function loadParser(parser: string) {
   if (parser === "@typescript-eslint/parser") {
-    loadedParsers.parsers["@typescript-eslint/parser"] =
-      await import("@typescript-eslint/parser")
+    // `markRaw` keeps the module out of the reactive proxy; wrapping it
+    // would violate the proxy invariant for its frozen `default` property.
+    loadedParsers.parsers["@typescript-eslint/parser"] = markRaw(
+      await import("@typescript-eslint/parser"),
+    )
   }
 }
 
