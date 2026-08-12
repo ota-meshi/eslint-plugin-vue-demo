@@ -19,7 +19,7 @@ import fs from "node:fs"
 import { createRequire } from "node:module"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
-import esbuild from "esbuild"
+import { rolldown } from "rolldown"
 
 const resolveModule = createRequire(import.meta.url).resolve
 const outDir = fileURLToPath(new URL("../prebundled", import.meta.url))
@@ -58,35 +58,61 @@ for (const target of TARGETS) {
  * Bundle the given package as CJS and wrap it into an ESM file.
  */
 async function prebundle({ name, exportNames }) {
-  const result = await esbuild.build({
-    entryPoints: [resolveModule(name)],
-    bundle: true,
-    write: false,
-    format: "cjs",
+  const bundle = await rolldown({
+    input: resolveModule(name),
     platform: "browser",
     external: EXTERNALS,
-    logLevel: "warning",
     plugins: [
       {
         name: "replace-require-resolve",
-        setup(build) {
+        transform(code, id) {
           // `require.resolve(...)` cannot work on the browser; replace it
           // with a dummy function call. (Only reached from the legacy
           // config definitions.)
-          build.onLoad(
-            { filter: /eslint-plugin-vue(js-accessibility)?[/\\].*\.js$/ },
-            (args) => ({
-              contents: fs
-                .readFileSync(args.path, "utf8")
-                .replaceAll("require.resolve", "(function(){return 0})"),
-              loader: "js",
-            }),
-          )
+          if (
+            /eslint-plugin-vue(?:js-accessibility)?[/\\].*\.js$/u.test(id) &&
+            code.includes("require.resolve")
+          ) {
+            return {
+              code: code.replaceAll(
+                "require.resolve",
+                "(function(){return 0})",
+              ),
+              map: null,
+            }
+          }
+          return undefined
+        },
+      },
+      {
+        // eslint-plugin-vue's dist is itself built with rolldown and
+        // contains `$N`-suffixed identifiers such as `require_foo$1`.
+        // When rolldown re-bundles it, its conflict renaming ignores
+        // those pre-existing names and emits self-references like
+        // `const require_foo$1 = require_foo$1()`. Renaming them away
+        // from the `$N` pattern avoids the collision. Limited to the
+        // `require_`/`import_` prefixes so that string literals such as
+        // a `"_$1"` replacement pattern are never touched.
+        name: "workaround-rolldown-rename-collision",
+        transform(code) {
+          if (!/\b(?:require|import)_\w+\$\d+\b/u.test(code)) {
+            return undefined
+          }
+          return {
+            code: code.replace(
+              /\b((?:require|import)_\w+)\$(\d+)\b/gu,
+              "$1_dollar_$2",
+            ),
+            map: null,
+          }
         },
       },
     ],
   })
-  const cjsCode = result.outputFiles[0].text
+  const { output } = await bundle.generate({ format: "cjs" })
+  await bundle.close()
+  const cjsCode = output[0].code
+  assertNoSelfReference(name, cjsCode)
   fs.mkdirSync(outDir, { recursive: true })
   fs.writeFileSync(
     path.join(outDir, `${name}.mjs`),
@@ -96,7 +122,25 @@ async function prebundle({ name, exportNames }) {
 }
 
 /**
- * Wrap an esbuild CJS bundle into an ESM module, rewiring `require()` of
+ * Guard against the rolldown rename collision described above: broken
+ * output assigns the result of calling an identifier to itself, e.g.
+ * `const require_foo$1 = require_foo$1()`. Fail fast instead of shipping
+ * a bundle that crashes at runtime.
+ */
+function assertNoSelfReference(name, code) {
+  const selfReference = /\b(?:var|let|const)\s+([\w$]+)\s*=\s*\1\(\)/u.exec(
+    code,
+  )
+  if (selfReference) {
+    throw new Error(
+      `${name}: rolldown produced a self-referencing binding ` +
+        `"${selfReference[0]}"; the bundle would crash at runtime`,
+    )
+  }
+}
+
+/**
+ * Wrap a CJS bundle into an ESM module, rewiring `require()` of
  * the externals to static imports.
  */
 function wrapAsEsm(cjsCode, exportNames) {
