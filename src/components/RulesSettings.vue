@@ -53,7 +53,7 @@
                 category.rules.some((rule) => !isErrorState(rule.ruleId)),
               )
             "
-            @input="onAllClick($event as MouseEvent)"
+            @input="onAllClick($event)"
           />
           <span>All Rules</span>
         </label>
@@ -97,7 +97,7 @@
                   !category.rules.every((rule) => isErrorState(rule.ruleId)) &&
                   !category.rules.every((rule) => !isErrorState(rule.ruleId))
                 "
-                @input="onCategoryClick(category, $event as MouseEvent)"
+                @input="onCategoryClick(category, $event)"
               />
               {{ category.title }}
             </label>
@@ -114,7 +114,7 @@
                 <input
                   :checked="isErrorState(rule.ruleId)"
                   type="checkbox"
-                  @input="onClick(rule.ruleId, $event as MouseEvent)"
+                  @input="onClick(rule.ruleId, $event)"
                 />
                 {{ rule.ruleId }}
               </label>
@@ -146,137 +146,142 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue"
+<script setup lang="ts">
+import { computed, reactive, ref, watch } from "vue"
 import type { Rule, Category } from "./scripts/rules"
-import { categories } from "./scripts/rules"
+import { categories as allCategories } from "./scripts/rules"
 
 const PARSERS = [
   { ts: "@typescript-eslint/parser" },
   "espree",
   "@typescript-eslint/parser",
 ]
-export default defineComponent({
-  name: "RulesSettings",
-  props: {
-    rules: {
-      type: Object,
-      required: true,
-    },
-    parser: {
-      type: [String, Object],
-      default: undefined,
-    },
+
+const props = defineProps({
+  rules: {
+    type: Object,
+    required: true,
   },
-  emits: ["update:rules", "update:parser"],
-  data() {
-    let parserIndex = PARSERS.findIndex((p) => deppEq(p, this.parser))
-    if (parserIndex < 0) {
-      parserIndex = 0
-    }
-    return {
-      PARSERS,
-      categoryState: Object.fromEntries(
-        categories.map((c) => {
-          return [
-            c.title,
-            {
-              close: true,
-            },
-          ]
-        }),
-      ),
-      state: {
-        toolsClose: true,
-      },
-      parserIndex,
-      filterValue: "",
-    }
-  },
-  computed: {
-    categories(): Category[] {
-      return categories.map((c) => {
-        const rules = this.filterRules(c.rules)
-        return {
-          ...c,
-          rules,
-        }
-      })
-    },
-  },
-  watch: {
-    parser() {
-      this.parserIndex = PARSERS.findIndex((p) => deppEq(p, this.parser))
-      if (this.parserIndex < 0) {
-        this.parserIndex = 0
-      }
-    },
-    parserIndex() {
-      const parser = PARSERS[this.parserIndex]
-      if (!deppEq(parser, this.parser)) {
-        this.$emit("update:parser", parser)
-      }
-    },
-  },
-  methods: {
-    filterRules(rules: Rule[]) {
-      let filteredRules = rules
-      if (this.filterValue) {
-        filteredRules = filteredRules.filter((r) =>
-          r.ruleId.includes(this.filterValue),
-        )
-      }
-      return filteredRules
-    },
-    onCategoryClick(category: Category, e: MouseEvent) {
-      const rules = Object.assign({}, this.rules)
-      for (const rule of category.rules) {
-        if ((e.target as HTMLInputElement).checked) {
-          rules[rule.ruleId] = "error"
-        } else {
-          delete rules[rule.ruleId]
-        }
-      }
-      this.$emit("update:rules", rules)
-    },
-    onAllClick(e: MouseEvent) {
-      const rules = Object.assign({}, this.rules)
-      for (const category of this.categories) {
-        for (const rule of category.rules) {
-          if ((e.target as HTMLInputElement).checked) {
-            rules[rule.ruleId] = "error"
-          } else {
-            delete rules[rule.ruleId]
-          }
-        }
-      }
-      this.$emit("update:rules", rules)
-    },
-    onClick(ruleId: string, e: MouseEvent) {
-      const rules = Object.assign({}, this.rules)
-      if ((e.target as HTMLInputElement).checked) {
-        rules[ruleId] = "error"
-      } else {
-        delete rules[ruleId]
-      }
-      this.$emit("update:rules", rules)
-    },
-    isErrorState(ruleId: string) {
-      return this.rules[ruleId] === "error" || this.rules[ruleId] === 2
-    },
+  parser: {
+    type: [String, Object],
+    default: undefined,
   },
 })
+const emit = defineEmits(["update:rules", "update:parser"])
 
-// as ThisTypedComponentOptionsWithRecordProps<
-//   Vue,
-//   { parserIndex: number; filterValue: string },
-//   { filterRules: (rules: Rule[]) => Rule[] },
-//   { categories: Category[] },
-//   {
-//     rules: Record<string, "error" | "off" | 2>
-//     parser: string | Record<string, string>
-//   }
-// >
+const categoryState = reactive(
+  Object.fromEntries(
+    allCategories.map((c) => {
+      return [
+        c.title,
+        {
+          close: true,
+        },
+      ]
+    }),
+  ),
+)
+const state = reactive({
+  toolsClose: true,
+})
+const parserIndex = ref(findParserIndex(props.parser))
+const filterValue = ref("")
+
+const categories = computed((): Category[] => {
+  return allCategories.map((c) => {
+    const rules = filterRules(c.rules)
+    return {
+      ...c,
+      rules,
+    }
+  })
+})
+
+watch(
+  () => props.parser,
+  (newParser) => {
+    parserIndex.value = findParserIndex(newParser)
+  },
+)
+watch(parserIndex, (newParserIndex) => {
+  const parser = PARSERS[newParserIndex]
+  if (!deppEq(parser, props.parser)) {
+    emit("update:parser", parser)
+  }
+})
+
+/**
+ * Find the index of the given parser in PARSERS
+ */
+function findParserIndex(parser: unknown): number {
+  const index = PARSERS.findIndex((p) => deppEq(p, parser))
+  return index < 0 ? 0 : index
+}
+
+/**
+ * Filter rules with the current filter value
+ */
+function filterRules(rules: Rule[]): Rule[] {
+  let filteredRules = rules
+  if (filterValue.value) {
+    filteredRules = filteredRules.filter((r) =>
+      r.ruleId.includes(filterValue.value),
+    )
+  }
+  return filteredRules
+}
+
+/**
+ * Handle category checkbox click
+ */
+function onCategoryClick(category: Category, e: Event) {
+  const rules = Object.assign({}, props.rules)
+  for (const rule of category.rules) {
+    if ((e.target as HTMLInputElement).checked) {
+      rules[rule.ruleId] = "error"
+    } else {
+      delete rules[rule.ruleId]
+    }
+  }
+  emit("update:rules", rules)
+}
+
+/**
+ * Handle all-rules checkbox click
+ */
+function onAllClick(e: Event) {
+  const rules = Object.assign({}, props.rules)
+  for (const category of categories.value) {
+    for (const rule of category.rules) {
+      if ((e.target as HTMLInputElement).checked) {
+        rules[rule.ruleId] = "error"
+      } else {
+        delete rules[rule.ruleId]
+      }
+    }
+  }
+  emit("update:rules", rules)
+}
+
+/**
+ * Handle rule checkbox click
+ */
+function onClick(ruleId: string, e: Event) {
+  const rules = Object.assign({}, props.rules)
+  if ((e.target as HTMLInputElement).checked) {
+    rules[ruleId] = "error"
+  } else {
+    delete rules[ruleId]
+  }
+  emit("update:rules", rules)
+}
+
+/**
+ * Checks whether the given rule is enabled
+ */
+function isErrorState(ruleId: string) {
+  return props.rules[ruleId] === "error" || props.rules[ruleId] === 2
+}
 
 /**
  * Checks whether the given values is equals

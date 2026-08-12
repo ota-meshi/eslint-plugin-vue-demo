@@ -2,7 +2,6 @@
   <div class="playground-root">
     <div class="playground-content">
       <RulesSettings
-        ref="settings"
         v-model:rules="rules"
         v-model:parser="parser"
         class="rules-settings"
@@ -37,8 +36,8 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue"
+<script setup lang="ts">
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import ESLintEditor from "./ESLintEditor.vue"
 import RulesSettings from "./RulesSettings.vue"
 import { deserializeState, serializeState } from "./scripts/state/index"
@@ -99,83 +98,61 @@ const buttonPointerEvents = computed(() =>
 </style>
 `
 
-type Data = {
-  code: string
-  rules: Record<string, "error" | "off">
-  parser: string | Record<string, string>
-  messages: any[]
+const initialState = deserializeState(
+  (typeof window !== "undefined" && window.location.hash.slice(1)) || "",
+)
+const code = ref(initialState.code || DEFAULT_CODE)
+const rules = ref(initialState.rules || { ...DEFAULT_RULES_CONFIG })
+const parser = ref(initialState.parser || "espree")
+const messages = ref<any[]>([])
+
+const serializedString = computed(() => {
+  return serializeState({
+    code: DEFAULT_CODE === code.value ? undefined : code.value,
+    rules: equalsRules(DEFAULT_RULES_CONFIG, rules.value)
+      ? undefined
+      : rules.value,
+    parser:
+      !parser.value || parser.value === "espree" ? undefined : parser.value,
+  })
+})
+
+watch(serializedString, (newSerializedString) => {
+  if (typeof window !== "undefined") {
+    window.location.replace(`#${newSerializedString}`)
+  }
+})
+
+onMounted(() => {
+  if (typeof window !== "undefined") {
+    window.addEventListener("hashchange", onUrlHashChange)
+  }
+})
+onBeforeUnmount(() => {
+  if (typeof window !== "undefined") {
+    window.removeEventListener("hashchange", onUrlHashChange)
+  }
+})
+
+/**
+ * Handle update-messages event
+ */
+function onUpdateMessages(newMessages: any[]) {
+  messages.value = newMessages
 }
 
-export default defineComponent({
-  name: "ESLintPlayground",
-  components: {
-    ESLintEditor,
-    RulesSettings,
-  },
-  data(): Data {
-    const serializedString =
-      (typeof window !== "undefined" && window.location.hash.slice(1)) || ""
-    const state = deserializeState(serializedString)
-    return {
-      code: state.code || DEFAULT_CODE,
-      rules: state.rules || { ...DEFAULT_RULES_CONFIG },
-      messages: [],
-      parser: state.parser || "espree",
-    }
-  },
-  computed: {
-    serializedString(): string {
-      const defaultCode = DEFAULT_CODE
-      const defaultRules = DEFAULT_RULES_CONFIG
-      const code = defaultCode === this.code ? undefined : this.code
-      const rules = equalsRules(defaultRules, this.rules)
-        ? undefined
-        : this.rules
-      const parser =
-        !this.parser || this.parser === "espree" ? undefined : this.parser
-      const serializedString = serializeState({
-        code,
-        rules,
-        parser,
-      })
-      return serializedString
-    },
-  },
-  watch: {
-    serializedString(serializedString: string) {
-      if (typeof window !== "undefined") {
-        window.location.replace(`#${serializedString}`)
-      }
-    },
-  },
-  mounted() {
-    if (typeof window !== "undefined") {
-      window.addEventListener("hashchange", this.onUrlHashChange)
-    }
-  },
-  beforeUnmount() {
-    if (typeof window !== "undefined") {
-      window.removeEventListener("hashchange", this.onUrlHashChange)
-    }
-  },
-  methods: {
-    onUpdateMessages(messages: any[]) {
-      this.messages = messages
-    },
-    getRule(ruleId: string) {
-      return getRule(ruleId)
-    },
-    onUrlHashChange() {
-      const serializedString =
-        (typeof window !== "undefined" && window.location.hash.slice(1)) || ""
-      if (serializedString !== this.serializedString) {
-        const state = deserializeState(serializedString)
-        this.code = state.code || DEFAULT_CODE
-        this.rules = state.rules || Object.assign({}, DEFAULT_RULES_CONFIG)
-      }
-    },
-  },
-})
+/**
+ * Handle URL hash change
+ */
+function onUrlHashChange() {
+  const currentSerializedString =
+    (typeof window !== "undefined" && window.location.hash.slice(1)) || ""
+  if (currentSerializedString !== serializedString.value) {
+    const state = deserializeState(currentSerializedString)
+    code.value = state.code || DEFAULT_CODE
+    rules.value = state.rules || { ...DEFAULT_RULES_CONFIG }
+  }
+}
 
 /** */
 function equalsRules(
