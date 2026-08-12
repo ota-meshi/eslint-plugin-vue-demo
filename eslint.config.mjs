@@ -7,7 +7,14 @@ import tseslint from "typescript-eslint"
 
 export default [
   {
-    ignores: ["node_modules", "dist", "!.vscode", "!.github", "!.devcontainer"],
+    ignores: [
+      "node_modules",
+      "dist",
+      "prebundled",
+      "!.vscode",
+      "!.github",
+      "!.devcontainer",
+    ],
   },
   ...myPlugin.config({
     vue3: true,

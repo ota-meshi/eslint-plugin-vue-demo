@@ -1,8 +1,8 @@
-import fs from "node:fs"
 import { createRequire } from "node:module"
 import { fileURLToPath, URL } from "node:url"
 import { defineConfig } from "vite"
 import vue from "@vitejs/plugin-vue"
+import eslint4b from "vite-plugin-eslint4b"
 
 const require = createRequire(import.meta.url)
 
@@ -29,51 +29,36 @@ function resolvePath(path: string): string {
   return fileURLToPath(new URL(path, import.meta.url))
 }
 
-const REQUIRE_RESOLVE_TARGET =
-  /node_modules\/eslint-plugin-vue(?:js-accessibility)?\/.*\.js$/u
-
-/**
- * Replace `require.resolve(...)` with a dummy function call, as it cannot
- * work on the browser. (Only reached from the legacy config definitions.)
- */
-function replaceRequireResolve(code: string): string {
-  return code.replaceAll("require.resolve", "(function(){return 0})")
-}
-
 export default defineConfig({
   base: "/eslint-plugin-vue-demo/",
-  plugins: [
-    vue(),
-    {
-      name: "replace-require-resolve",
-      enforce: "pre",
-      transform(code, id) {
-        if (
-          REQUIRE_RESOLVE_TARGET.test(id) &&
-          code.includes("require.resolve")
-        ) {
-          return { code: replaceRequireResolve(code), map: null }
-        }
-        return undefined
-      },
-    },
-  ],
+  plugins: [vue(), eslint4b()],
   define: {
     __BUILD_AT__: JSON.stringify(
       new Date().toLocaleString(undefined, {
         timeZoneName: "short",
       }),
     ),
-    "process.env.NODE_DEBUG": "false",
   },
   resolve: {
     alias: [
-      // Run the ESLint Linter on the browser. The `$`-anchored patterns
-      // must not catch subpath imports like `eslint/package.json`.
-      { find: /^eslint$/u, replacement: resolvePath("./shim/eslint/index.js") },
+      // The CJS-distributed ESLint plugins/parsers `require("eslint")`,
+      // which must resolve to vite-plugin-eslint4b's virtual modules.
+      // The dep optimizer cannot do that, so they are pre-bundled into
+      // plain ESM by scripts/prebundle.mjs. The `$`-anchored patterns
+      // must not catch subpath imports like `eslint-plugin-vue/package.json`.
       {
-        find: /^eslint\/use-at-your-own-risk$/u,
-        replacement: resolvePath("./shim/eslint/use-at-your-own-risk.js"),
+        find: /^eslint-plugin-vue$/u,
+        replacement: resolvePath("./prebundled/eslint-plugin-vue.mjs"),
+      },
+      {
+        find: /^vue-eslint-parser$/u,
+        replacement: resolvePath("./prebundled/vue-eslint-parser.mjs"),
+      },
+      {
+        find: /^eslint-plugin-vuejs-accessibility$/u,
+        replacement: resolvePath(
+          "./prebundled/eslint-plugin-vuejs-accessibility.mjs",
+        ),
       },
       // vue-eslint-parser and eslint-plugin-vue use `createRequire` to
       // resolve parsers and plugins at runtime.
@@ -94,10 +79,18 @@ export default defineConfig({
       },
       // Node built-in polyfills. Absolute paths so that `node:`-prefixed
       // specifiers also resolve to the npm packages.
+      // `path` and `fs` use string `find`s so that vite-plugin-eslint4b
+      // detects them and does not add its own shims over them.
       {
-        find: /^(node:)?path$/u,
+        find: "path",
         replacement: resolvePath("./node_modules/path-browserify/index.js"),
       },
+      {
+        find: "node:path",
+        replacement: resolvePath("./node_modules/path-browserify/index.js"),
+      },
+      { find: "fs", replacement: resolvePath("./shim/empty-object.js") },
+      { find: "node:fs", replacement: resolvePath("./shim/empty-object.js") },
       {
         find: /^(node:)?assert$/u,
         replacement: resolvePath("./node_modules/assert/build/assert.js"),
@@ -106,43 +99,12 @@ export default defineConfig({
         find: /^(node:)?events$/u,
         replacement: resolvePath("./node_modules/events/events.js"),
       },
-      {
-        find: /^(node:)?fs$/u,
-        replacement: resolvePath("./shim/empty-object.js"),
-      },
     ],
   },
   optimizeDeps: {
-    esbuildOptions: {
-      plugins: [
-        {
-          // The dep optimizer does not apply Vite plugin transforms,
-          // so the same `require.resolve` replacement is needed here.
-          name: "replace-require-resolve",
-          setup(build) {
-            build.onLoad(
-              { filter: /eslint-plugin-vue(js-accessibility)?[/\\].*\.js$/ },
-              (args) => ({
-                contents: replaceRequireResolve(
-                  fs.readFileSync(args.path, "utf8"),
-                ),
-                loader: "js",
-              }),
-            )
-          },
-        },
-      ],
-    },
     // Distributed as a raw `.vue` file.
     exclude: ["@ota-meshi/site-kit-eslint-editor-vue"],
     include: [
-      // Aliased to local shim files, which the dependency scanner does not
-      // treat as dependencies; force pre-bundling of their CJS internals.
-      "eslint",
-      "eslint/use-at-your-own-risk",
-      "vue-eslint-parser",
-      "eslint-plugin-vue",
-      "eslint-plugin-vuejs-accessibility",
       // Loaded lazily via dynamic import; pre-bundle to avoid a full reload.
       "@typescript-eslint/parser",
       "typescript",

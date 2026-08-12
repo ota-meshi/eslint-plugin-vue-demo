@@ -4,8 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "serve": "vite",
-    "build": "vue-tsc --noEmit && NODE_OPTIONS=--max-old-space-size=8192 vite build",
+    "prebundle": "node scripts/prebundle.mjs",
+    "serve": "npm run prebundle && vite",
+    "build": "npm run prebundle && vue-tsc --noEmit && NODE_OPTIONS=--max-old-space-size=8192 vite build",
     "preview": "vite preview",
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
@@ -34,6 +35,7 @@
     "@types/node": "^24.0.0",
     "@types/pako": "^3.0.0",
     "@vitejs/plugin-vue": "^6.0.8",
+    "esbuild": "^0.28.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-eslint-comments": "^3.2.0",
     "eslint-plugin-jsdoc": "^64.0.0",
@@ -47,7 +49,8 @@
     "prettier": "^3.0.0",
     "typescript-eslint": "^8.0.0",
     "typescript-eslint-parser-for-extra-files": "^0.9.0",
-    "vite": "^7.3.6",
+    "vite": "^8.2.1",
+    "vite-plugin-eslint4b": "^0.8.1",
     "vue-tsc": "^3.3.9"
   }
 }
