@@ -37,7 +37,7 @@
     "@types/pako": "^3.0.0",
     "@vitejs/plugin-vue": "^6.0.8",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-jsdoc": "^64.0.0",
+    "eslint-plugin-jsdoc": "^65.0.0",
     "eslint-plugin-json-schema-validator": "^6.0.0",
     "eslint-plugin-jsonc": "^3.0.0",
     "eslint-plugin-n": "^18.0.0",
